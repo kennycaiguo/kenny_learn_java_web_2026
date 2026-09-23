@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="servlet-api">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/web03/lib/servlet-api.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://D:/programs/apache-tomcat-10.1.60-src.zip!/apache-tomcat-10.1.60-src/java" />
+      <root url="jar://D:/programs/apache-tomcat-10.1.60-src.zip!/apache-tomcat-10.1.60-src/modules/jdbc-pool/src/main/java" />
+      <root url="jar://D:/programs/apache-tomcat-10.1.60-src.zip!/apache-tomcat-10.1.60-src/modules/jdbc-pool/src/test/java" />
+      <root url="jar://D:/programs/apache-tomcat-10.1.60-src.zip!/apache-tomcat-10.1.60-src/test" />
+      <root url="jar://D:/programs/apache-tomcat-10.1.60-src.zip!/apache-tomcat-10.1.60-src/webapps/docs/appdev/sample/src" />
+      <root url="jar://D:/programs/apache-tomcat-10.1.60-src.zip!/apache-tomcat-10.1.60-src/webapps/examples/WEB-INF/classes" />
+    </SOURCES>
+  </library>
+</component>
