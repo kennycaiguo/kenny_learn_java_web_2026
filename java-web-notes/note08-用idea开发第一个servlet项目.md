@@ -106,7 +106,7 @@
 
 ![image-20260923140626255](./note08-用idea开发第一个servlet项目.assets/image-20260923140626255.png)
 
-## 26.点击确定退出配置，然后我们需要配置工见artifact，点击文件-》项目结构-》工件
+## 26.点击确定退出配置，然后我们需要配置工件artifact，点击文件-》项目结构-》工件
 
 ![image-20260923141004842](./note08-用idea开发第一个servlet项目.assets/image-20260923141004842.png)
 
@@ -156,27 +156,7 @@
 
 ![image-20260923144000102](./note08-用idea开发第一个servlet项目.assets/image-20260923144000102.png)
 
-# 破解暂时没有成功，先试用一下，扩展：激活idea2025，
 
-## idea2025下载：https://www.jetbrains.com/zh-cn/idea/download/other/#releases-2025
-
-## 激活教程网址：https://zhuanlan.zhihu.com/p/1984768103180165134
-
-# 激活插件网址：http://helper.idejihuo.com/#home
-
-## 注册信息
-
-![image-20260923103458178](./note08-用idea开发第一个servlet项目.assets/image-20260923103458178.png)
-
-### 1.下载idea2025.3.6的64位压缩版，解压到d:\programs,然后把插件解压到它的里面
-
-![image-20260923110733517](./note08-用idea开发第一个servlet项目.assets/image-20260923110733517.png)
-
-### 2.进入bin文件夹，修改idea64.exe.vmoptions，添加下面的代码
-
-![image-20260923111037105](./note08-用idea开发第一个servlet项目.assets/image-20260923111037105.png)
-
-### 3.保存退出，然后重启ide
 
 # 2.关于idea在tomcat服务器的配置
 
@@ -299,4 +279,12 @@ public class HelloServlet implements Servlet {
 ## 3.4，然后我们只需要点击更新服务器按钮就可以，我们在浏览器里面输入：http://localhost:8080/web03/hello 效果如下
 
 ![image-20260923161339097](./note08-用idea开发第一个servlet项目.assets/image-20260923161339097.png)
+
+# 扩展，激活jbrain的ide2025版本
+
+网址: https://blog.idejihuo.com/jetbrains/intellij-idea-2025-2-latest-activation-tutorial-permanent-activation-code-cracking-tool-2099.html
+
+工具下载： https://fileio.lanzouw.com/ibL0z3d03sng
+
+下载后解压缩，然后以管理员的身份运行jetbra-free-windows7-amd64.exe，会打开一个本地网站，我们只需要配置好名字和过期时间，点击submit，然后用鼠标点击我们需要激活的软件，出现cracked，说明激活成功
 
