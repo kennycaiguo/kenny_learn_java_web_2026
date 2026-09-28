@@ -97,3 +97,107 @@
 
 # 2.测试Servlet对象的生命周期
 
+## 1.还是上面的web05项目，我们在service方法里面编写LifecycleServlet的构造方法在里面输出无参构造函数被调用的语句，然后在每一个函数里面都添加输出语句，目的就是看看那个函数被调用了
+
+```
+package org.kenny.servlet;
+
+import jakarta.servlet.*;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+public class LifecycleServlet implements Servlet {
+    //编写无参构造方法
+    public LifecycleServlet() {
+        System.out.println("LifecycleServlet constructor no params called!!!");
+    }
+
+    @Override
+    public void init(ServletConfig servletConfig) throws ServletException {
+        System.out.println("init方法执行了");
+    }
+
+    @Override
+    public ServletConfig getServletConfig() {
+        System.out.println("getServletConfig方法执行了");
+        return null;
+    }
+
+    @Override
+    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+        System.out.println("service方法执行了");
+        res.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = res.getWriter();
+        out.println("Hello Clients");
+
+    }
+
+    @Override
+    public String getServletInfo() {
+        System.out.println("getServletInfo方法执行了");
+        return "";
+    }
+
+    @Override
+    public void destroy() {
+        System.out.println("destroy方法执行了");
+    }
+}
+
+```
+
+
+
+## 2.启动tomcat服务器，默认是没有成就Servlet对象，也没有方法被调用，然后在浏览器中输入：http://localhost:8080/web05/life，在控制台中可以看到，构造函数和init和service方法被调用了
+
+![image-20260925114811449](./note10-Servlet对象的生命周期.assets/image-20260925114811449.png)
+
+## 3.然后我们关闭服务器，控制台上显示destroy方法会被调用
+
+![image-20260925115221005](./note10-Servlet对象的生命周期.assets/image-20260925115221005.png)
+
+### 执行效果如下
+
+![image-20260925115345540](./note10-Servlet对象的生命周期.assets/image-20260925115345540.png)
+
+### 总结如下
+
+![image-20260925115855857](./note10-Servlet对象的生命周期.assets/image-20260925115855857.png)
+
+![image-20260925120731567](./note10-Servlet对象的生命周期.assets/image-20260925120731567.png)
+
+![image-20260925123505325](./note10-Servlet对象的生命周期.assets/image-20260925123505325.png)
+
+<img src="./note10-Servlet对象的生命周期.assets/image-20260925125333272.png" alt="image-20260925125333272" style="zoom:80%;" />
+
+![image-20260925125501780](./note10-Servlet对象的生命周期.assets/image-20260925125501780.png)
+
+![image-20260925125810115](./note10-Servlet对象的生命周期.assets/image-20260925125810115.png)
+
+![image-20260925130154264](./note10-Servlet对象的生命周期.assets/image-20260925130154264.png)
+
+# 3.servlet3大核心方法的作用
+
+![image-20260927123900724](./note10-Servlet对象的生命周期.assets/image-20260927123900724.png)
+
+![image-20260927124705369](./note10-Servlet对象的生命周期.assets/image-20260927124705369.png)
+
+# 4.在服务器启动阶段实例化Servlet对象
+
+## 4.1 假如我们有这样子的2个servlet，AServlet和BServlet，我们分别在两个Servlet的init方法在输入一行文本，AServlet init和BServlet init
+
+![image-20260927125111527](./note10-Servlet对象的生命周期.assets/image-20260927125111527.png)
+
+## 4.2 然后我们在web.xml中做如下配置
+
+![image-20260927125310419](./note10-Servlet对象的生命周期.assets/image-20260927125310419.png)
+
+## 4.3 然后启动服务器，发现这两个类的方法都被调用了
+
+![image-20260927125422342](./note10-Servlet对象的生命周期.assets/image-20260927125422342.png)
+
+## 注意默认情况下，当服务器启动，但是又没有用户访问，是不会创建servlet对象的，如果你需要servlet对象在服务器启动是时候就创建，需要在web.xml里面添加一个load-on-startup配置，注意，里面的数字越小，优先级越高。
+
+
+

@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class LifecycleServlet implements Servlet {
+    //编写无参构造方法
+    public LifecycleServlet() {
+        System.out.println("LifecycleServlet constructor no params called!!!");
+    }
+
     @Override
     public void init(ServletConfig servletConfig) throws ServletException {
         System.out.println("init方法执行了");
