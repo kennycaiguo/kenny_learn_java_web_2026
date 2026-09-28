@@ -302,6 +302,10 @@ public class BServlet extends GenericServlet {
 
 ### 注意：只要服务器一直开着，这个值就会一直存在。ServletContext的一个应用就是可以用来统计一个网站的在线人数。
 
+### 使用ServletContext来保存数据的情况如下
+
+![image-20260927203116898](./note13-ServletContext.assets/image-20260927203116898.png)
+
 
 
 
