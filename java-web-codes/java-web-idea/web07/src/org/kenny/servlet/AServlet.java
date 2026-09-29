@@ -7,6 +7,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebServlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @WebServlet("/a")
 public class AServlet extends GenericServlet {
@@ -17,6 +18,8 @@ public class AServlet extends GenericServlet {
         User user = new User("Jack",20);
         //设置到上下文中
         getServletContext().setAttribute("user",user);
-
+        response.setContentType("text/html;charset=utf-8");
+        PrintWriter out = response.getWriter();
+        out.println("user已经被创建。。。");
     }
 }

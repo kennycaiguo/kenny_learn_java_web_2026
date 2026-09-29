@@ -3,15 +3,26 @@
 ### 1. 概念
 
 - ServletContext 也叫做 Servlet 上下文，WEB容器在启动时，它会为每个 WEB 应用程序都创建一个对应的 ServletContext 对象，它代表当前web应用。这个对象全局唯一且被项目类所有 Servlet 共享，所有叫全局应用程序共享对象
+
 - ServletConfig对象中维护了ServletContext对象的引用，开发人员在编写servlet时，可以通过ServletConfig.getServletContext方法获得ServletContext对象。
+
 - 一个WEB应用中的所有Servlet共享同一个 ServletContext 对象，因此Servlet对象之间可以通过 ServletContext 对象来实现通讯。ServletContext对象通常也被称之为 context 域对象。
+
+  ![image-20260928151759238](./note13-ServletContext.assets/image-20260928151759238.png)
 
 ### 2. 作用
 
-1. **是一个域对象**
-2. **可以读取全局配置参数**
-3. **可以搜索当前工程目录下面的资源文件**
+1. **应用范围内的实际共享**：在这个web应用中共享数据
+
+2. **获取应用初始化参数**：读取web.xml中的上下文参数（contextParam和initParam）
+
+3. **访问应用资源**：读取web应用内的文件资源路径
+
 4. **可以获取当前工程名字**
+
+5. **日志记录**： 提供应用级的日志记录功能
+
+   
 
 ### 3. 获取
 
@@ -290,7 +301,7 @@ public class BServlet extends GenericServlet {
 
 ## 8.我们在AServlet的service方法中创建一个User对象，并且保存到ServletContext对象中
 
-![image-20260927201651486](./note13-ServletContext.assets/image-20260927201651486.png)
+![image-20260928154415532](./note13-ServletContext.assets/image-20260928154415532.png)
 
 ## 9.然后我们在BServlet在获取这个User对象
 
@@ -306,7 +317,109 @@ public class BServlet extends GenericServlet {
 
 ![image-20260927203116898](./note13-ServletContext.assets/image-20260927203116898.png)
 
+## 11.我们可以新建一个DelServlet用来删除我们设置到上下文对象中的值。代码如下
 
+![image-20260928154447118](./note13-ServletContext.assets/image-20260928154447118.png)
+
+## 12.重启服务器，先在浏览器中输入http://localhost:8080/web07/a 设置user的值，如何再输入http://localhost:8080/web07/b 来获取，是没有问题的
+
+![image-20260928154600046](./note13-ServletContext.assets/image-20260928154600046.png)
+
+![image-20260928154213674](./note13-ServletContext.assets/image-20260928154213674.png)
+
+## 13.然后我们输入：http://localhost:8080/web07/del ，然后再访问：http://localhost:8080/web07/b ,就获取不到值了
+
+![image-20260928154752971](./note13-ServletContext.assets/image-20260928154752971.png)
+
+![image-20260928154821512](./note13-ServletContext.assets/image-20260928154821512.png)
+
+## 14.我们在web.xml中添加一些上下文参数
+
+![image-20260928154853832](./note13-ServletContext.assets/image-20260928154853832.png)
+
+
+
+## 15然后我们创建一个CServlet，注意它是无法获取TestServletContext的initPatam的，因为这是独享的。但是它可以获取contextParam也是使用同一个函数：getInitParameterNames()
+
+![image-20260928155559189](./note13-ServletContext.assets/image-20260928155559189.png)
+
+## 16.重启服务器，在浏览器中输入：http://localhost:8080/web07/c ，效果如下
+
+![image-20260928155725946](./note13-ServletContext.assets/image-20260928155725946.png)
+
+
+
+## 17.我们在CServlet里面调用getContextPath(也就是页面的根路径)然后输出到页面
+
+![image-20260928160814195](./note13-ServletContext.assets/image-20260928160814195.png)
+
+## 18.重启服务器，在浏览器中输入：http://localhost:8080/web07/c ，效果如下
+
+![image-20260928160921823](./note13-ServletContext.assets/image-20260928160921823.png)
+
+## 19.也可以获取一个路径的绝对路径，也就是我们部署到服务器的真实路径
+
+![image-20260928161703517](./note13-ServletContext.assets/image-20260928161703517.png)
+
+![image-20260928161746525](./note13-ServletContext.assets/image-20260928161746525.png)
+
+![image-20260928161947079](./note13-ServletContext.assets/image-20260928161947079.png)
+
+![image-20260928162019703](./note13-ServletContext.assets/image-20260928162019703.png)
+
+## 20.也可以获取web.xml的绝对路径
+
+![image-20260928163234032](./note13-ServletContext.assets/image-20260928163234032.png)
+
+![image-20260928163257477](./note13-ServletContext.assets/image-20260928163257477.png)
+
+### 需要注意的是：/WEB-INF是受保护的，不能在浏览器中访问，但是在servlet函数里面是可以访问的。
+
+## 21.可以使用getResourceAsStream来打开一个文件并且返回一个输入流，我们在WEB-INF里面新建一个jdbc.properties文件，内容如下
+
+![image-20260928163911495](./note13-ServletContext.assets/image-20260928163911495.png)
+
+## 22.然后我们来获取它的内容，并且输出这个对象
+
+![image-20260928175221067](./note13-ServletContext.assets/image-20260928175221067.png)
+
+![image-20260928175248866](./note13-ServletContext.assets/image-20260928175248866.png)
+
+## 23.然后我们来添加记录日志的代码，注意日志在日志选项卡中输出，控制台没有，页面也没有
+
+![image-20260928183457502](./note13-ServletContext.assets/image-20260928183457502.png)
+
+### 重启服务器，在浏览器中访问：http://localhost:8080/web07/c，就可以在日志选项卡里面看到输出
+
+![image-20260928183631400](./note13-ServletContext.assets/image-20260928183631400.png)
+
+## ServletContext可以记录服务器级别的日志信息，保存在虚拟tomcat服务器的log文件夹中。
+
+
+
+
+
+# 扩展： ServletContext的常用方法
+
+## 1.getAttribute(name)
+
+## 2.setAttriute(name,value)
+
+## 3.getInitParameter(name) //获取指定名称的初始化参数的值
+
+## 4.getInitParameterNames() //获取所有的初始化参数，得到一个Enumeration< String>集合
+
+## 5.removeAttribute(name) //删除指定的属性
+
+## 6.getContextPath() //获取上下文路径
+
+## 7.getRealPath()
+
+## 8.getResouresAsStream(path) //打开一个指定的文件并且返回输入流对象
+
+## 9.log(String msg)
+
+## 10.log(String msg,Throwable throwable)
 
 
 
@@ -339,3 +452,4 @@ public class BServlet extends GenericServlet {
    - Servlet 在运行过程中，可以通过自身持有的 `ServletConfig` 获取自己的专属配置。
    - Servlet 也可以通过 `getServletConfig().getServletContext()` 轻松拿到全局的 `ServletContext`，从而实现与其他 Servlet 的数据共享和交互
 
+![image-20260928184553041](./note13-ServletContext.assets/image-20260928184553041.png)

@@ -3,6 +3,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
+
+    <!--context-param是所有servlet共享的-->
+    <context-param>
+        <param-name>username</param-name>
+        <param-value>admin</param-value>
+    </context-param>
+    <context-param>
+        <param-name>password</param-name>
+        <param-value>1234</param-value>
+    </context-param>
+
+    <!--一个servlet里面的参数是这个servlet独享的，其他servlet获取不到-->
     <servlet>
         <servlet-name>test</servlet-name>
         <servlet-class>org.kenny.servlet.TestServletConifg</servlet-class>
