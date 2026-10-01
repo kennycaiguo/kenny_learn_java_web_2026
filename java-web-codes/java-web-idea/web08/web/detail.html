@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>部门详情</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!--<script>if (localStorage.getItem('dept_admin_auth') !== 'true' && sessionStorage.getItem('dept_admin_auth') !== 'true') {-->
+<!--    location.href = 'index.html';-->
+<!--}</script>-->
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand">Dept<span>Admin</span></div>
+        <nav><a class="active" href="list.html">部门管理</a></nav>
+    </aside>
+    <main class="main">
+        <header class="topbar"><h1>部门详情</h1>
+            <div class="user">管理员
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        <section class="page">
+            <div class="page-header">
+                <div><h2 id="title">部门详情</h2>
+                    <p>查看部门完整信息</p></div>
+                <div><a id="edit" class="btn btn-primary">编辑</a><a class="btn btn-light ml8"
+                                                                     href="list.html">返回列表</a></div>
+            </div>
+            <div class="card detail-card">
+                <div class="detail-grid">
+                    <div><small>部门 ID</small><strong id="id"></strong></div>
+                    <div><small>部门名称</small><strong id="name"></strong></div>
+                    <div><small>负责人</small><strong id="leader"></strong></div>
+                    <div><small>上级部门</small><strong id="parent"></strong></div>
+                    <div><small>联系电话</small><strong id="phone"></strong></div>
+                    <div><small>状态</small><strong id="status"></strong></div>
+                    <div class="full"><small>部门描述</small>
+                        <p id="description">—</p></div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<script src="js/data.js"></script>
+<!--<script>-->
+<!--    const id = Number(new URLSearchParams(location.search).get('id'));-->
+<!--    const d = getDepts().find(x => Number(x.id) === id);-->
+<!--    if (!d) {-->
+<!--        alert('部门不存在');-->
+<!--        location.href = 'list.html';-->
+<!--    } else {-->
+<!--        for (const k of ['id', 'name', 'leader', 'parent', 'phone', 'description']) document.getElementById(k).textContent = d[k] || '—';-->
+<!--        document.getElementById('status').innerHTML = '<span class="badge ' + (d.status === '启用' ? 'on' : 'off') + '">' + d.status + '</span>';-->
+<!--        document.getElementById('edit').href = 'edit.html?id=' + id;-->
+<!--        document.getElementById('title').textContent = d.name;-->
+<!--    }-->
+<!--</script>-->
+<script>function logout() {
+    localStorage.removeItem('dept_admin_auth');
+    sessionStorage.removeItem('dept_admin_auth');
+    location.href = 'index.html';
+}</script>
+</body>
+</html>

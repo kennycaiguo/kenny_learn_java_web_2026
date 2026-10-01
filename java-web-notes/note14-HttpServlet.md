@@ -334,13 +334,59 @@ public class Main {
 
 
 
+## 描述HttpServlet执行原理
 
+HttpServlet 的执行原理核心在于**Servlet 容器（如 Tomcat）接收到客户端的 HTTP 请求后，通过多线程调度并调用 `service()` 方法，再分发到具体的 `doGet()` 或 `doPost()` 等方法中完成响应**。
+
+核心执行流程
+
+- **请求接收**：客户端（浏览器）发送 HTTP 请求到 Web 服务器，服务器（如 Tomcat）的**连接器（Connector）**监听到请求并将其包装成 `HttpServletRequest` 和 `HttpServletResponse` 对象。 
+- **容器分发**：容器根据请求的 URL 路径匹配到对应的 Servlet 映射，从容器的**Servlet 缓存**中查找该 Servlet 实例（如果实例不存在，则先执行加载、实例化和 `init()` 初始化）。
+- **调用 service 方法**：容器为每个请求创建一个**新的线程**，调用该 HttpServlet 对象的 `service(ServletRequest req, ServletResponse res)` 方法。 
+- **分发至 doXXX 方法**：`HttpServlet` 的 `service()` 方法会将参数强转为 `HttpServletRequest` 和 `HttpServletResponse`，并获取 HTTP 请求方式（GET、POST 等）。
+- **多态触发**：根据请求方式，`service()` 内部通过分支判断分别调用对应的 **`doGet()`、`doPost()`、`doPut()`** 等子方法。开发者在自定义 Servlet 中重写这些方法来实现具体业务逻辑。 
+- **响应输出**：业务处理完毕后，数据写入 `HttpServletResponse` 对象，由容器将其转换为标准的 HTTP 响应报文发送回客户端。 [[1](https://cloud.baidu.com/article/3308493)]
+
+生命周期简述
+
+1. **加载与实例化**：容器启动时或首次请求时通过反射创建 Servlet 对象。
+2. **初始化**：调用 `init()` 方法，仅执行一次。
+3. **服务**：多次调用 `service()` 方法处理请求。
+4. **销毁**：服务器关闭或应用卸载时调用 `destroy()` 方法释放资源
 
 
 
 # 3.405错误的发生
 
+是由于开发者没有根据前端的请求方法来编写对应的处理函数导致的。比如前端发送的是get请求，而程序员却在servlet里面重写了doPost方法，导致系统检测不到程序员的doGet代码，就会执行父类的doGet函数，而父类doGet函数就只是做一件事，就是抛出405错误。
+
+要避免405错误也非常简单，就是根据请求方法来写对应的请求方法处理函数。
+
 
 
 # 4.JavaWeb最佳实践
 
+JavaWeb开发的最佳实践包括清晰的[代码分层](https://www.51cto.com/article/573085.html)、安全的[数据传输与加密防护](https://cloud.baidu.com/article/2695281)，以及高效的[前端与后端性能优化](https://blog.csdn.net/fm241694049/article/details/152588660)。 
+
+架构与代码分层
+
+- **职责分离**：采用经典的三层架构（Controller控制层、Service业务逻辑层、DAO数据访问层），让每一层各司其职，降低代码耦合度。
+- **外部化配置**：将数据库连接、端口等敏感或易变配置放入外部的 `properties` 或 `yaml` 文件中，避免硬编码。
+- **统一异常与日志**：在全局捕获异常，将检查异常转换为运行时异常或自定义异常，并添加适当的日志记录以便排查问题。
+
+安全性考虑
+
+- **密码加密**：用户注册和登录时使用盐值加密（如 BCrypt）安全存储密码，禁止明文保存。
+- **输入校验与防攻击**：对所有用户输入进行过滤和转义，防止 SQL 注入和 XSS 跨站脚本攻击。
+- **传输加密**：全面启用 HTTPS 协议，防止数据在传输过程中被窃取或篡改。 
+
+性能优化
+
+- **前端优化**：压缩合并静态资源（CSS、JS），开启浏览器缓存，对图片实施懒加载和压缩，减少网络传输与请求次数。
+- **后端缓存**：合理利用 Redis 或本地缓存减轻数据库查询压力，提高系统响应速度。
+
+进一步探索
+
+- 了解具体的 黑马程序员最新版JavaWeb综合案例 获取实战与性能优化技巧。
+- 参考 [Servlet/JSP核心技术巩固的最佳实践](https://zhuanlan.zhihu.com/p/22112669?refer=passer) 夯实底层基础。
+- 查看 Java Web应用的代码分层最佳实践 深入学习解耦与事务处理逻辑。
