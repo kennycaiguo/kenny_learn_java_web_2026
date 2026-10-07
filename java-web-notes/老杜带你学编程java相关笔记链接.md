@@ -1,13 +1,4 @@
-# kenny_learn_java_web_2026
-学习Java Web开发
-
-## javaweb在线讲义
-
-### https://heuqqdmbyk.feishu.cn/wiki/HBcSw6zsYixRvVkXp9jcDreNnoh
-
-## 老杜带你学编程java相关笔记链接
-
-### 01-JavaSE
+## 01-JavaSE
 
 https://www.yuque.com/dujubin/java/na23g2vnz7cgzzdi?singleDoc# 《第01章 初识Java》
 https://www.yuque.com/dujubin/java/rw03xkpkadgaw7u7?singleDoc# 《第02章 Java基础语法》
@@ -31,55 +22,64 @@ https://www.yuque.com/dujubin/java/cxnnnxpt8ubmiqle?singleDoc# 《第17章 Java�
 
 https://www.yuque.com/dujubin/java/uzw5g4gtnuew49yp?singleDoc# 《MySQL》
 
-03-JDBC
+## 03-JDBC
+
 https://www.yuque.com/dujubin/java/cy7vu9zsa0gmpprp?singleDoc# 《JDBC》
 
-04-Web前端
+## 04-Web前端
+
 https://www.yuque.com/dujubin/java/gr1diu?singleDoc# 《HTML5》
 https://www.yuque.com/dujubin/java/uqkric?singleDoc# 《CSS3》
 https://www.yuque.com/dujubin/java/lk3u4vr4uc1ekxbk?singleDoc# 《JavaScript（ES6）》
 
-05-XML&JSON
+## 05-XML&JSON
+
 https://www.yuque.com/dujubin/java/anghr4?singleDoc# 《XML&JSON》
 
+## 06-JavaWeb
 
-06-JavaWeb
 https://www.yuque.com/dujubin/java/rd3n67sf9bnakih9?singleDoc# 《Servlet&Thymeleaf》
 
+## 07-Ajax&axios
 
-07-Ajax&axios
 https://www.yuque.com/dujubin/java/szlh0l?singleDoc# 《AJAX&Axios》
 
-08-Maven
+## 08-Maven
+
 https://www.yuque.com/dujubin/java/hp5bllxqf7g9gmn5?singleDoc# 《Maven&Nexus》
 
+## 09-MyBatis
 
-09-MyBatis
 https://www.yuque.com/dujubin/java/udots9ngcd97pyui?singleDoc# 《MyBatis》
 
+## 10-Spring
 
-10-Spring
 https://www.yuque.com/dujubin/java/lyvg9x9hf3u22s7e?singleDoc# 《Spring》
 
+## 11-SpringMVC
 
-11-SpringMVC
 https://www.yuque.com/dujubin/java/myxi54xu063hgsl4?singleDoc# 《SpringMVC》
 
-12-SpringBoot
+## 12-SpringBoot
+
 https://www.yuque.com/dujubin/java/uwxe0halgc03tm93?singleDoc# 《Spring Boot》
 
+## 13-MyBatis-Plus
 
-13-MyBatis-Plus
 https://www.yuque.com/dujubin/java/qgp36l3entp30hp2?singleDoc# 《MyBatis-Plus》
 
-14-TypeScript
+## 14-TypeScript
+
 https://www.yuque.com/dujubin/java/mt5sq6akfcx5fr5g?singleDoc# 《TypeScript》
 
-15-Vue3
+## 15-Vue3
+
 https://www.yuque.com/dujubin/java/vu082c?singleDoc# 《Vue3》
 
-16-ElementPlus
+## 16-ElementPlus
+
 https://www.yuque.com/dujubin/java/yw2xscrz4thagw34?singleDoc# 《Element Plus》
 
-17-Linux
+## 17-Linux
+
 https://www.yuque.com/dujubin/java/nurwunyse629kzwy?singleDoc# 《Linux》
