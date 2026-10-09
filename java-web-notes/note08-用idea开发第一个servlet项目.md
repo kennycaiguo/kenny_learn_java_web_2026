@@ -280,7 +280,17 @@ public class HelloServlet implements Servlet {
 
 ![image-20260923161339097](./note08-用idea开发第一个servlet项目.assets/image-20260923161339097.png)
 
-# 扩展，激活jbrain的ide2025版本
+# 扩展1，修改了所有配置，仍然有乱码，需要设置system.out的编码
+
+```
+try {
+    System.setOut(new PrintStream(System.out, true, "UTF-8"));
+} catch (java.io.UnsupportedEncodingException e) {
+    e.printStackTrace();
+}
+```
+
+# 扩展2，激活jbrain的ide2025版本
 
 网址: https://blog.idejihuo.com/jetbrains/intellij-idea-2025-2-latest-activation-tutorial-permanent-activation-code-cracking-tool-2099.html
 

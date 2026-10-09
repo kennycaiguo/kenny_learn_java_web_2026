@@ -9,6 +9,9 @@
       <module fileurl="file://$PROJECT_DIR$/web06/web06.iml" filepath="$PROJECT_DIR$/web06/web06.iml" />
       <module fileurl="file://$PROJECT_DIR$/web07/web07.iml" filepath="$PROJECT_DIR$/web07/web07.iml" />
       <module fileurl="file://$PROJECT_DIR$/web08/web08.iml" filepath="$PROJECT_DIR$/web08/web08.iml" />
+      <module fileurl="file://$PROJECT_DIR$/web09/web09.iml" filepath="$PROJECT_DIR$/web09/web09.iml" />
+      <module fileurl="file://$PROJECT_DIR$/web10/web10.iml" filepath="$PROJECT_DIR$/web10/web10.iml" />
+      <module fileurl="file://$PROJECT_DIR$/web11/web11.iml" filepath="$PROJECT_DIR$/web11/web11.iml" />
     </modules>
   </component>
 </project>

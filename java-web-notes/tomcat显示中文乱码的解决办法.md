@@ -15,3 +15,13 @@ Windows系统命令行默认编码是GBK，而Tomcat日志默认是UTF-8，编�
 
 - **POST 请求**：在代码中通过 `request.setCharacterEncoding("UTF-8")` 设置请求体编码（需在获取参数前执行）。
 - **GET 请求**：通常需要修改 `conf/server.xml` 中的 Connector 标签，配置 `URIEncoding="UTF-8"`（Tomcat 8及以上版本默认已是UTF-8）
+
+## 如果进行了上面的设置都没有效果，需要设置System.out对象的字符编码
+
+```
+try {
+    System.setOut(new PrintStream(System.out, true, "UTF-8"));
+} catch (java.io.UnsupportedEncodingException e) {
+    e.printStackTrace();
+}
+```
