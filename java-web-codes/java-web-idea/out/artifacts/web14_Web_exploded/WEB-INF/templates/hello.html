@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title>在Servlet中使用Thymeleaf-Hello页面</title>
+<!--    <script>-->
+<!--        function del(deptNO){-->
+<!--            if(window.confirm("你确定要删除数据吗?")){-->
+<!--                window.location.href="/dept/delete?deptNo="+deptNO-->
+<!--            }-->
+<!--        }-->
+<!--    </script>-->
+</head>
+<body>
+   <p th:text="|Hello,${username}|">Hello Girl</p>
+   <hr>
+<!--   <button onclick="del(10)">删除部门</button>-->
+</body>
+</html>

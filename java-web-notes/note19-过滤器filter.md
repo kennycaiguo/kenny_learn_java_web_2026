@@ -292,6 +292,7 @@ public class Client {
 3. **<font style="color:rgb(64, 64, 64);">对比经典责任链</font>**<font style="color:rgb(64, 64, 64);">：</font>
    * **<font style="color:rgb(64, 64, 64);">强制传递</font>**<font style="color:rgb(64, 64, 64);">：必须调用</font><font style="color:rgb(64, 64, 64);"> </font><code>**<font style="color:rgb(64, 64, 64);background-color:rgb(236, 236, 236);">chain.doFilter()</font>**</code><font style="color:rgb(64, 64, 64);"> </font><font style="color:rgb(64, 64, 64);">确保请求到达 Servlet，而经典模式可能中途终止。</font>
    * **<font style="color:rgb(64, 64, 64);">双向处理</font>**<font style="color:rgb(64, 64, 64);">：支持请求前/后的拦截（经典模式通常单向）。</font>
+   * 过滤器和经典责任链的还有个最大的不同就是，链中的一个过滤器处理完了它能够处理的部分，后，需要调用filterChain.doFilter来方行以便web请求最终能够达到servlet，而经典责任链是当前处理器处理后，就不会向后传递，后面的代码无法执行。过滤器有点向关卡。
 
 
 
@@ -401,9 +402,66 @@ public class Client {
 
 ## 需要注意：用注解的方式是无法配置过滤器的优先级的，如果你需要使用优先级，就只能够在web.xml里面配置
 
+# 演练2.简单责任链案例
 
+## 1.还是web11模块，我们添加一个chain包
 
+![image-20261011105627265](./note19-过滤器filter.assets/image-20261011105627265.png)
 
+## 2.然后我们在里面新建有Client公共类和一个抽象处理器类Handler和2个具体处理器类HandlerA和HandlerB，代码如下
+
+```
+package chain;
+
+abstract class  Handler{
+    protected Handler next;
+
+    public void setNext(Handler next) {
+        this.next = next;
+    }
+    public abstract void handleRequest(String request);
+}
+
+class HandlerA extends Handler{
+    @Override
+    public void handleRequest(String request) {
+        if(request.equals("A")){
+            System.out.println("处理器A正在处理请求。。。");
+        } else if(next!=null){
+            next.handleRequest(request);
+        }
+    }
+}
+
+class HandlerB extends Handler{
+    @Override
+    public void handleRequest(String request) {
+        if(request.equals("B")){
+            System.out.println("处理器B正在处理请求。。。");
+        } else if(next!=null){
+            next.handleRequest(request);
+        }
+    }
+}
+public class Client {
+    public static void main(String[] args) {
+       Handler handlerA = new HandlerA();
+       Handler handlerB = new HandlerB();
+       handlerA.setNext(handlerB);
+       handlerA.handleRequest("A");
+//       handlerA.handleRequest("B");
+    }
+}
+
+```
+
+## 3,我们先发送A请求，此时HandlerA能够处理，HandlerB的代码不会zx
+
+![image-20261011111239379](./note19-过滤器filter.assets/image-20261011111239379.png)
+
+## 4.然后我们发送B请求， 此时HandlerA的对象不能够处理，就会执行HandlerB对象的方法代码
+
+![image-20261011111411213](./note19-过滤器filter.assets/image-20261011111411213.png)
 
 
 
