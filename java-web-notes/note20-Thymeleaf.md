@@ -6,13 +6,9 @@
 
 <font style="color:rgb(64, 64, 64);">前端代码（HTML/CSS/JS）与后端Java逻辑混杂在同一个Servlet中，违反</font>**<font style="color:rgb(64, 64, 64);">关注点分离（SoC）</font>**<font style="color:rgb(64, 64, 64);">原则。修改前端时需要重新编译Servlet，调试困难；团队协作时前后端开发者互相干扰。</font>
 
-<font style="color:rgb(64, 64, 64);"></font>
-
 2. **<font style="color:rgb(64, 64, 64);">开发效率低</font>**
 
 <font style="color:rgb(64, 64, 64);">Java字符串拼接HTML（如</font><code>**<font style="color:rgb(64, 64, 64);background-color:rgb(236, 236, 236);">out.println("<div>...</div>")</font>**</code><font style="color:rgb(64, 64, 64);">）极其繁琐且易错。</font>
-
-<font style="color:rgb(64, 64, 64);"></font>
 
 3. **<font style="color:rgb(64, 64, 64);">安全性风险</font>**
 
@@ -755,11 +751,11 @@ public class ThymeleafInitializer implements ServletContextListener {
 
 ![image-20261011212729144](./note20-Thymeleaf.assets/image-20261011212729144.png)
 
-## 11.注意，此时无法获取到username的值，如果需要获取，我们可以修改代码
+## 
 
-![image-20261011212326809](./note20-Thymeleaf.assets/image-20261011212326809.png)
 
-## 12.然后我们修改一下HelloServlet的代码
+
+## 11.然后我们修改一下HelloServlet的代码
 
 ![image-20261011212752221](./note20-Thymeleaf.assets/image-20261011212752221.png)
 
@@ -767,8 +763,195 @@ public class ThymeleafInitializer implements ServletContextListener {
 
 ![image-20261011212827949](./note20-Thymeleaf.assets/image-20261011212827949.png)
 
-## 13.其实这里是转发好一点，我们这里还是使用转发
+## 12.其实这里是转发好一点，我们这里还是使用转发
 
 ![image-20261011213634015](./note20-Thymeleaf.assets/image-20261011213634015.png)
 
 ![image-20261011213656123](./note20-Thymeleaf.assets/image-20261011213656123.png)
+
+# 演练3. 添加日志系统
+
+## 1.我们的项目目前是没有日志系统的。
+
+![image-20261012142455943](./note20-Thymeleaf.assets/image-20261012142455943.png)
+
+## 那个slf4j只是一个接口，没有具体实现，我们需要添加logback-core-1.4.14.jar和ogback-classic-1.4.14.jar(到maven中央仓库下载)到WEB-INF/lib/里面
+
+![image-20261012141738536](./note20-Thymeleaf.assets/image-20261012141738536.png)
+
+## 2，在src文件夹里面新建一个logback.xml文件，
+
+![image-20261012142318359](./note20-Thymeleaf.assets/image-20261012142318359.png)
+
+## 内容如下
+
+```
+<configuration>
+    <!-- 只输出 ERROR 级别及以上的日志 -->
+    <logger name="org.thymeleaf" level="ERROR"/>
+
+    <!-- 关闭 Thymeleaf 初始化 DEBUG 日志 -->
+    <logger name="org.thymeleaf.TemplateEngine" level="INFO"/>
+
+    <!-- 控制台输出格式简化 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} [%thread] %-5level - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 全局日志级别设为 WARN -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
+```
+
+### 重启服务器，日志找不到的警告就消失了。
+
+# 演练3. Thymeleaf基础语法学习，还是使用web14模块
+
+## 1，th:text和th:utext有什么不一样？我们在index.html里面添加一些代码来测试一下，我们在HelloServlet里面添加一个msg变量，它是一个含有html标签的字符串，
+
+![image-20261012151631755](./note20-Thymeleaf.assets/image-20261012151631755.png)
+
+## 
+
+## 2.然后我们在index.html里面添加一下p标签然来测试一下，
+
+![image-20261012152147016](./note20-Thymeleaf.assets/image-20261012152147016.png)
+
+## 3.启动服务器，在浏览器中输入：http://localhost:8080/web14/hello ，效果如下
+
+![image-20261012153832506](./note20-Thymeleaf.assets/image-20261012153832506.png)
+
+## 4.我们可以来测试一下类对象可不可以渲染，新建一个entity包，创建一个User类
+
+![image-20261012155838213](./note20-Thymeleaf.assets/image-20261012155838213.png)
+
+## 5.然后我们在HelloServlet的doGet方法里面创建一个User对象并且设置到请求域，然后转发
+
+![image-20261012160132182](./note20-Thymeleaf.assets/image-20261012160132182.png)
+
+## 6.然后我们在index.html里面添加使用这个对象的值
+
+![image-20261012161248870](./note20-Thymeleaf.assets/image-20261012161248870.png)
+
+### 重启服务器，输入http://localhost:8080/web14/hello，效果如下
+
+![image-20261012161420045](./note20-Thymeleaf.assets/image-20261012161420045.png)
+
+### 注意：我们在模板里面使用user.username,在servlet里面其实是调用user.getUsername()方法，所以它能够获取到值
+
+## 7.th:if和th:unless，th:if会使得元素在if条件为true时显示，th:unless会使得元素在unless条件为true时显示，我们可以给User条件另外一个属性isAdmin,并且添加setter和getter重写全参数构造函数和toString方法
+
+```
+package org.kenny.thymeleaf.entity;
+
+public class User {
+    private String username;
+    private int age;
+    private boolean isAdmin;
+
+    public User(String username, int age, boolean isAdmin) {
+        this.username = username;
+        this.age = age;
+        this.isAdmin = isAdmin;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
+    }
+
+    public User(String username, int age) {
+        this.username = username;
+        this.age = age;
+    }
+    public User() {}
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+//    @Override
+//    public String toString() {
+//        return "User{" + "username=" + username + ", age=" + age + '}';
+//    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "username='" + username + '\'' +
+                ", age=" + age +
+                ", isAdmin=" + isAdmin +
+                '}';
+    }
+}
+
+```
+
+## 8.然后我们在HelloServlet里面新建一个user2对象，然后把他存到请求域里面
+
+![image-20261012165942571](./note20-Thymeleaf.assets/image-20261012165942571.png)
+
+## 9.然后在index.html里面我们同时使用th:if和th:unless来显示管理员的用户信息
+
+![image-20261012170749583](./note20-Thymeleaf.assets/image-20261012170749583.png)
+
+### 效果如下
+
+![image-20261012171016376](./note20-Thymeleaf.assets/image-20261012171016376.png)
+
+## 注意:idea有一个坑，
+
+## ![image-20261012172252668](./note20-Thymeleaf.assets/image-20261012172252668.png)
+
+# 演练4 th:each
+
+## 1.在HelloServlet里面新建一个ArrayList< User> users集合，添加3个用户，然后保存到请求域中
+
+![image-20261012182332379](./note20-Thymeleaf.assets/image-20261012182332379.png)
+
+## 2.然后我们在模板文件里面遍历这个集合，可以这么写
+
+![image-20261012183448619](./note20-Thymeleaf.assets/image-20261012183448619.png)
+
+### 效果：
+
+![image-20261012183558494](./note20-Thymeleaf.assets/image-20261012183558494.png)
+
+## 3.还可以这么用
+
+![image-20261012190508993](./note20-Thymeleaf.assets/image-20261012190508993.png)
+
+### 效果如下：
+
+![image-20261012190919978](./note20-Thymeleaf.assets/image-20261012190919978.png)
+
+## 4.其实遍历集合，冒号前面可以有2个变量，第一个是集合中的元素，第二个是状态变量，可以获取元素的索引等等的一些状态信息
+
+![image-20261012192035789](./note20-Thymeleaf.assets/image-20261012192035789.png)
+
+### 效果
+
+![image-20261012192118844](./note20-Thymeleaf.assets/image-20261012192118844.png)
+
+### 注意这个状态对象有很多属性，index下下标从0开始，count是从1开始的，even属性可以判断当前是否是偶数行，odd是奇数行，first是一个元素，last是最后一个元素
+
+![image-20261012192640957](./note20-Thymeleaf.assets/image-20261012192640957.png)
+
+![image-20261012192718267](./note20-Thymeleaf.assets/image-20261012192718267.png)

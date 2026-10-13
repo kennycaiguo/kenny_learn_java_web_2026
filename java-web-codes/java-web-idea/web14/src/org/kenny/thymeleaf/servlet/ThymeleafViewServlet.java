@@ -19,13 +19,9 @@ public class ThymeleafViewServlet extends HttpServlet {
         resp.setContentType("text/html;charset=UTF-8");
         //从request域中获取模板文件
         String tmpl =(String)req.getAttribute("template");
-        String username = (String)req.getAttribute("username");
         if(tmpl==null){
             //如果没有,我们就从查询参数里面获取
             tmpl =req.getParameter("template");
-        }
-        if(username==null){
-            username= req.getParameter("username"); //需要在查询字符串中传递
         }
         ServletContext application = getServletContext();
         //获取适配器对象

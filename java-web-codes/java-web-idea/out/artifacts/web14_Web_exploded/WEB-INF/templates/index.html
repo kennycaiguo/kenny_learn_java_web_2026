@@ -15,5 +15,35 @@
    <p th:text="|Welcome Home,${username}|">Welcome Home,Girl</p>
    <hr>
    <button onclick="del(10)">删除部门</button>
+   <hr>
+   <p>th:text的效果</p>
+  <!--th:text不会解析html标签，是安全的-->
+   <p th:text="${msg}">Welcome Home,Girl</p>
+   <p>th:utext的效果</p>
+   <!--th:utext会解析执行HTML标签，所以是危险的 -->
+   <p th:utext="${msg}">Welcome Home,Girl</p>
+   <hr>
+   <div th:text="${user}">用户信息</div>
+   <div th:text="${user.username}">姓名</div>
+   <div th:text="${user.age}">年龄</div>
+   <hr>
+   <p>th:if的效果</p>
+   <p th:if="${user2.isAdmin}" th:text="${user2.username}">管理员姓名</p>
+   <p>th:unless的效果</p>
+   <p th:unless="${user2.isAdmin}" th:text="${user2.username}">管理员姓名</p>
+   <hr>
+    <h3>用户集合</h3>
+   <ul>
+<!--      <li th:each="user : ${users}" th:text="|${user.username} == ${user.age} == ${user.isAdmin}|"></li>-->
+      <li th:each="user,status : ${users}" >
+         <p>
+             索引值:  <span th:text="${status.index}"></span>
+             用户姓名: <span th:text="${user.username}"></span>
+             用户年龄: <span th:text="${user.age}"></span>
+             是否管理员:<span th:text="${user.isAdmin}"></span>
+         </p>
+
+      </li>
+   </ul>
 </body>
 </html>
