@@ -45,5 +45,42 @@
 
       </li>
    </ul>
+   <hr>
+<h4>Thymeleaf动态链接</h4>
+<!--   <a th:href="@{/detail?id=5}">部门详情</a>-->
+<!--   <a th:href="@{/detail(id=5)}">部门详情</a>-->
+<!--   <a th:href="@{/detail(id=5)}">部门详情</a>-->
+   <!--拼接路径：http://localhost:8080/web14/detail?id=5&admin=jack   -->
+   <a th:href="@{/detail(id=5,admin='jack')}">部门详情</a>
+   <hr>
+<h3>Thymeleaf绑定表单</h3>
+<!--   <form th:action="@{/save}" method="post">-->
+<!--       用户名：<input type="text" name="username" id="username" th:value="${user.username}"> <br>-->
+<!--       年 龄：<input type="text" name="age" id="age" th:value="${user.age}"> <br>-->
+<!--       <button>提交</button>-->
+<!--   </form>-->
+   <form th:action="@{/save}" method="post" th:object="${user}">
+       用户名：<input type="text" name="username" id="username" th:value="*{username}"> <br>
+       年 龄：<input type="text" name="age" id="age" th:value="*{age}"> <br>
+       <button>提交</button>
+   </form>
+   <hr>
+   <!--定义公共头部-->
+   <div th:fragment="header1">
+       <h1>本模块里面的公共头部</h1>
+   </div>
+  <!-- 使用本模板文件的公共头部  -->
+   <div th:replace="~{::header1}"></div>
+  <!-- 使用common.html模板文件的公共头部  -->
+  <div th:replace="~{common::header2}"></div>
+<!--  #string2,#numbers,#dates,#lists-->
+   <p th:text="${#strings.toUpperCase(user.username)}"></p>
+
+   <div th:each="i : ${#numbers.sequence(1, 5)}">
+       <span th:text="'第 ' + ${i} + ' 行'"></span>
+   </div>
+<!--   <p th:text="${#dates.createNow().toLocaleString()}"></p>-->
+   <p th:text="|当前日期: ${#dates.format(#dates.createNow(),'yyyy-MM-dd HH:mm:ss')}|"></p>
+  <p th:text="${#lists.size(users)}"></p>
 </body>
 </html>

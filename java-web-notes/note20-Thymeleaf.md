@@ -955,3 +955,75 @@ public class User {
 ![image-20261012192640957](./note20-Thymeleaf.assets/image-20261012192640957.png)
 
 ![image-20261012192718267](./note20-Thymeleaf.assets/image-20261012192718267.png)
+
+# 演练5，thymeleaf动态url
+
+## 1.还是模块web14，我们在index.html模板文件里面添加一个链接
+
+![image-20261013174101989](./note20-Thymeleaf.assets/image-20261013174101989.png)
+
+## 2.启动服务器，点击链接，就会跳转到http://localhost:8080/web14/detail?id=5，此时是404，因为我们这里压根就没有处理这个链接
+
+![image-20261013174246055](./note20-Thymeleaf.assets/image-20261013174246055.png)
+
+##  3.还可以这么写
+
+![image-20261013174608983](./note20-Thymeleaf.assets/image-20261013174608983.png)
+
+![image-20261013174653060](./note20-Thymeleaf.assets/image-20261013174653060.png)
+
+## 4.如果需要2个查询参数，可以这么写
+
+![image-20261013175121680](./note20-Thymeleaf.assets/image-20261013175121680.png)
+
+![image-20261013175143603](./note20-Thymeleaf.assets/image-20261013175143603.png)
+
+# 演练6表单绑定
+
+## 1.在index.html模板里面添加一个表单，动态添加添加路径和动态添加input元素的value
+
+![image-20261013182215865](./note20-Thymeleaf.assets/image-20261013182215865.png)
+
+## 2.进入：view-source:http://localhost:8080/web14/hello ，查看页面源码，效果如下，注意：此时点击提交按钮会报405，因为我们没有处理post请求
+
+![image-20261013182714017](./note20-Thymeleaf.assets/image-20261013182714017.png)
+
+## 3.给input元素绑定值还有一种写法,在form元素上面th:object="${user}绑定对象，然后在input中用*{属性名称}来获取属性值（idea会给你标红色波浪线，不要管他，我们这里没有错误）
+
+```
+ <form th:action="@{/save}" method="post" th:object="${user}"> 
+       用户名：<input type="text" name="username" id="username" th:value="*{username}"> <br>
+       年 龄：<input type="text" name="age" id="age" th:value="*{age}"> <br>
+       <button>提交</button>
+ </form>
+```
+
+# 演练7 Thumeleaf代码判断复用
+
+## 方式1.使用本模块的公共代码判断，在本模块里面用th:fragment定义一代码判断，然后在其他地方引用注意：引用代码片段是用~{}的
+
+![image-20261013193200317](./note20-Thymeleaf.assets/image-20261013193200317.png)
+
+## 方式2.新建一个common.html模板文件，在里面定义一个代码片段header2
+
+![image-20261013193317360](./note20-Thymeleaf.assets/image-20261013193317360.png)
+
+## 3.然后在index.html模板文件里面引用这个Common头部代码判断
+
+![image-20261013193407332](./note20-Thymeleaf.assets/image-20261013193407332.png)
+
+### 效果：
+
+![image-20261013193604300](./note20-Thymeleaf.assets/image-20261013193604300.png)
+
+## 注意，如果你把公共代码判断的display数值为none，就会看不见
+
+# 演练8.Thymeleaf中的工具函数的使用
+
+## 可以参考在线文档： https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html ，下面是一些案例代码
+
+![image-20261013201310649](./note20-Thymeleaf.assets/image-20261013201310649.png)
+
+## 效果
+
+![image-20261013201421191](./note20-Thymeleaf.assets/image-20261013201421191.png)
