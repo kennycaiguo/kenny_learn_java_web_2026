@@ -73,6 +73,8 @@
    <div th:replace="~{::header1}"></div>
   <!-- 使用common.html模板文件的公共头部  -->
   <div th:replace="~{common::header2}"></div>
+
+
 <!--  #string2,#numbers,#dates,#lists-->
    <p th:text="${#strings.toUpperCase(user.username)}"></p>
 
@@ -82,5 +84,30 @@
 <!--   <p th:text="${#dates.createNow().toLocaleString()}"></p>-->
    <p th:text="|当前日期: ${#dates.format(#dates.createNow(),'yyyy-MM-dd HH:mm:ss')}|"></p>
   <p th:text="${#lists.size(users)}"></p>
+
+   <hr>
+  <h3>Thymeleaf取值</h3>
+   <p th:text="${msg}"></p>
+   <p th:text="${session.msg}"></p>
+   <p th:text="${application.msg}"></p>
+  <!--获取查询参数的数据此时访问路径要改为/hello?msg=xxx-->
+  <p th:text="${param.msg}"></p>
+
+ <!--在模板文件中定义局部变量-->
+ <div th:with="greeting='Hello Everyone'">
+     <p th:text="${greeting}" style="color:deeppink"></p>
+ </div>
+  <!--在div里面定义的变量只能给他的子元素使用,在外面获取不到-->
+ <p th:text="${greeting}" style="background-color:green;height: 30px;"></p>
+<script th:inline="javascript">
+    let rootPath=/*[[@{/}]]*/  //获取在js里面获取项目根路径
+    function deleteById(id){
+        if(window.confirm("你确定删除部门?")){
+            document.location.href=rootPath+"delete?id="+id
+        }
+    }
+</script>
+<button onclick="deleteById(5)">删除部门</button>
+
 </body>
 </html>

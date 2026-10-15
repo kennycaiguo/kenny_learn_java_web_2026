@@ -1027,3 +1027,46 @@ public class User {
 ## 效果
 
 ![image-20261013201421191](./note20-Thymeleaf.assets/image-20261013201421191.png)
+
+# 演练9.Thymeleaf从session和ServletContext对象(application对象)获取数据
+
+## 1.默认情况下，thymeleaf只会获取当前请求的数据，它会先取他的WebContext里面查找数据，找不到的话，会到request域里面获取数据。其中WebContext对象的优先级比request高，如果他们中有同名变量，WebContext中的会覆盖request中的。
+
+## 2.Thymeleaf还可以从session,application,param等等地方获取数据
+
+![image-20261014110731566](./note20-Thymeleaf.assets/image-20261014110731566.png)
+
+## 3，还是web14项目，我们先在HelloServlet中存一些数据
+
+![image-20261014112148031](./note20-Thymeleaf.assets/image-20261014112148031.png)
+
+### 效果如下
+
+![image-20261014112231786](./note20-Thymeleaf.assets/image-20261014112231786.png)
+
+## 4.然后我们在index.html文件里面添加一个获取查询字符串里面的数据的代码
+
+![image-20261014112504090](./note20-Thymeleaf.assets/image-20261014112504090.png)
+
+### 重启服务器，在浏览器中输入http://localhost:8080/web14/hello?msg=%E6%9F%A5%E8%AF%A2%E5%8F%82%E6%95%B0%E4%B8%AD%E7%9A%84%E6%B6%88%E6%81%AF ，效果如下
+
+![image-20261014112739207](./note20-Thymeleaf.assets/image-20261014112739207.png)
+
+## 5.还有一个要点，就是可以在模板文件里面的一个元素定义一个局部变量，然后在子元素可以获取，在元素外面获取不到
+
+![image-20261014115428840](./note20-Thymeleaf.assets/image-20261014115428840.png)
+
+### 效果
+
+![image-20261014115535244](./note20-Thymeleaf.assets/image-20261014115535244.png)
+
+# 演练10.Thymeleaf内联js
+
+## 1.我们可以也在script标签里面使用th:inline来内联js,目的是使得我们的路径可以动态拼接，不过写法比较怪异
+
+![image-20261014124711830](./note20-Thymeleaf.assets/image-20261014124711830.png)
+
+## 点击删除按钮，就可以链接到我们的路径web/14/delete?id=5
+
+
+

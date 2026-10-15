@@ -1,10 +1,12 @@
 package org.kenny.thymeleaf.servlet;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.kenny.thymeleaf.entity.User;
 
 import java.io.IOException;
@@ -35,6 +37,13 @@ public class HelloServlet extends HttpServlet {
         users.add(u3);
         //把集合设置到请求域
         req.setAttribute("users",users);
+        //在各个域对象中存一些数据
+        req.setAttribute("msg","请求域中的消息");
+        HttpSession session = req.getSession();
+        session.setAttribute("msg","session域中的消息");
+        ServletContext application = getServletContext();
+        application.setAttribute("msg","应用域中的消息");
+
         //转发
         req.getRequestDispatcher("/view").forward(req,resp);
         //重定向
