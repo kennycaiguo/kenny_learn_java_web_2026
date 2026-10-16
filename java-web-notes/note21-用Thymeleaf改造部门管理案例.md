@@ -829,3 +829,296 @@ public class DeptUpdateServlet extends HttpServlet {
 ## 18.然后响应清理一下浏览器的缓存，然后重启服务器，效果正常
 
 ![image-20261014184303828](./note21-用Thymeleaf改造部门管理案例.assets/image-20261014184303828.png)
+
+# 演练2.用Thymeleaf改造部门详情页面
+
+## 1.找到DeptDetailServlet,把输出html的代码删除，把dept对象设置到请求域，并且把detail模板页面名称也设置到请求域，然后转发到/view
+
+![image-20261015172132416](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015172132416.png)
+
+## 2.然后我们来修改detail.html文件，先导入th命名空间
+
+![image-20261015174059622](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015174059622.png)
+
+## 3.然后把样式代码抽取出来，放到css/detail.css文件中然后需要把它引入进来，使用thymeleaf语法
+
+![image-20261015174543379](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015174543379.png)
+
+## 4.然后用dept的数据动态修改页面的数据，修改后的DeptDetailServlet代码如下
+
+```
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部门管理系统 - 部门详情</title>
+   
+    <link rel="stylesheet" th:href="@{/css/detail.css}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>部门详细信息</h1>
+            <a th:href="@{/list}" class="back-btn">返回列表</a>
+        </div>
+        
+        <div class="detail-card">
+            <div class="detail-row">
+                <div class="detail-label" >部门编号</div>
+                <div class="detail-value" th:text="${dept.deptNo}">D001</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">部门名称</div>
+                <div class="detail-value" th:text="${dept.dName}">技术部</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">部门地理位置</div>
+                <div class="detail-value" th:text="${dept.loc}">北京总部A座3层</div>
+            </div>
+        </div>
+        
+        <div class="action-btns">
+            <a th:href="@{/edit(id=${dept.deptNo})}" class="edit-btn">编辑部门信息</a>
+        </div>
+    </div>
+</body>
+</html>
+```
+
+### 效果
+
+![image-20261015175239127](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015175239127.png)
+
+![image-20261015175303290](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015175303290.png)
+
+![image-20261015175323077](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015175323077.png)
+
+# 演练3.用thymeleaf改造添加模板文件
+
+## 1.打开DeptAddServlet,把输出html的代码删除，然后把add.html模板文件的名称添加到请求域，转发到/view
+
+![image-20261015184358872](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015184358872.png)
+
+## 2.打开WEB-INF/templates/add.html文件，先引入th命名空间，然后把样式代码抽取到css/add.css中，然后在add.thml里面引入
+
+![image-20261015180740649](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015180740649.png)
+
+## 3.然后把需要改为动态的部分都修改了，修改后的add.html代码如下
+
+```
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部门管理系统 - 添加部门</title>
+    <link rel="stylesheet" th:href="@{/css/add.css}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>添加新部门</h1>
+            <a th:href="@{/list}" class="back-btn">返回列表</a>
+        </div>
+        
+        <form th:action="@{/save}" method="post">
+            <div class="form-group">
+                <label for="deptName">部门名称</label>
+                <input type="text" id="deptName" name="deptName" placeholder="请输入部门名称" required>
+            </div>
+            <div class="form-group">
+                <label for="location">部门地理位置</label>
+                <input type="text" id="location" name="location" placeholder="请输入部门地理位置" required>
+            </div>
+            
+            <div class="footer">
+                <button type="submit" class="submit-btn">保存</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+```
+
+### 也可以怎么写
+
+```
+<!DOCTYPE html>
+<html lang='zh-CN' xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>部门管理系统 - 修改部门</title>
+    <link rel="stylesheet" th:href="@{/css/edit.css}">
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>修改部门信息</h1>
+            <a th:href="@{/list}" class='back-btn'>返回列表</a>
+        </div>
+        
+        <form th:action="@{/update}" method='post' th:object="${dept}">
+            <div class='form-group'>
+                <label for='deptId'>部门编号</label>
+                <input type='text' id='deptId' name='deptId' th:value="*{deptNo}" readonly>
+            </div>
+            <div class='form-group'>
+                <label for='deptName'>部门名称</label>
+                <input type='text' id='deptName' name='deptName' th:value="*{dName}" required>
+            </div>
+            <div class='form-group'>
+                <label for='location'>部门地理位置</label>
+                <input type='text' id='location' name='location' th:value="*{loc}" required>
+            </div>
+            
+            <div class='btn-group'>
+                <a th:href="@{/list}" class='cancel-btn'>取消</a>
+                <button type='submit' class='submit-btn'>保存更改</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+
+```
+
+
+
+### 效果
+
+![image-20261015181521910](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015181521910.png)
+
+![image-20261015181553284](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015181553284.png)
+
+![image-20261015181611934](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015181611934.png)
+
+![image-20261015181638542](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015181638542.png)
+
+![image-20261015181656419](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015181656419.png)
+
+## 4.另外，DeptSaveServlet的代码其实不用修改，因为都是java代码，不需要输出html代码到页面，同理，DeptUpdateServlet的代码也不需要修改
+
+# 演练4.用thymeleaf改造edit页面
+
+## 1.打开DeptEditServlet,把输出html的代码全部删除，然后用获取到的id查找数据封装dept对象保存到请求域，另外把模板名称edit也保存到请求域然后转发到/view
+
+![image-20261015194303095](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015194303095.png)
+
+## 2.打开edit.html模板文件，先添加th命名空间映射，然后把样式代码抽取到css/edit.css文件中。然后在edit.html文件里面引用这个css文件
+
+![image-20261015194508118](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015194508118.png)
+
+## 3.把所有需要动态数据的地方都用thymeleaf语法替换，替换后的edit.html的代码如下
+
+```
+<!DOCTYPE html>
+<html lang='zh-CN' xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>部门管理系统 - 修改部门</title>
+    <link rel="stylesheet" th:href="@{/css/edit.css}">
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>修改部门信息</h1>
+            <a th:href="@{/list}" class='back-btn'>返回列表</a>
+        </div>
+        
+        <form th:action="@{/update}" method='post'>
+            <div class='form-group'>
+                <label for='deptId'>部门编号</label>
+                <input type='text' id='deptId' name='deptId' th:value="${dept.deptNo}" readonly>
+            </div>
+            <div class='form-group'>
+                <label for='deptName'>部门名称</label>
+                <input type='text' id='deptName' name='deptName' th:value="${dept.dName}" required>
+            </div>
+            <div class='form-group'>
+                <label for='location'>部门地理位置</label>
+                <input type='text' id='location' name='location' th:value="${dept.loc}" required>
+            </div>
+            
+            <div class='btn-group'>
+                <a th:href="@{/list}" class='cancel-btn'>取消</a>
+                <button type='submit' class='submit-btn'>保存更改</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+```
+
+### 效果展示
+
+![image-20261015194713541](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015194713541.png)
+
+![image-20261015194803298](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015194803298.png)
+
+![image-20261015194827426](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015194827426.png)
+
+![image-20261015194845525](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015194845525.png)
+
+![image-20261015194905668](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015194905668.png)
+
+![image-20261015194942477](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015194942477.png)
+
+![image-20261015195000028](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015195000028.png)
+
+### 注意：DeptUpdateServlet的代码不需要修改，因为它不需要渲染页面
+
+# 演练5.用thymeleaf语法改造删除页面
+
+## 1.首先需要打开WEB-INF/templates/list.html，在里面修改跳转到删除路径的代码,先把删除链接的代码修改如下
+
+![image-20261015201611551](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015201611551.png)
+
+## 2.然后我们需要在head元素里面添加一个script并且，使用thymeleaf内联js的方式，代码如下,省略的代码没有修改
+
+```
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部门管理系统 - 部门列表</title>
+    <!--/dept/css/list.css的动态写法-->
+    <link rel="stylesheet" th:href="@{/css/list.css}">
+    <script th:inline="javascript">
+          function deleteById(elem) {
+             //获取项目根路径，js里面有点怪
+             let cntPath = /*[[@{/}]]*/
+             let id = elem.getAttribute("data-id")
+             if(window.confirm("你确定要删除数据吗，不可恢复哦")){
+                document.location.href=cntPath+"delete?id="+id
+             }
+          }
+    </script>
+</head>
+...
+ <a href="javascript:void(0)" th:data-id="${dept.deptNo}" class="action-btn delete-btn"
+onclick="deleteById(this)">删除</a>
+                                                                          
+...
+```
+
+## 注意：DeptDeleteServlet的代码也是不要修改
+
+### 效果展示
+
+![image-20261015202951491](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015202951491.png)
+
+![image-20261015203014305](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015203014305.png)
+
+![image-20261015203029477](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015203029477.png)
+
+![image-20261015203053624](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015203053624.png)
+
+![image-20261015203107471](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015203107471.png)
+
+![image-20261015203123539](./note21-用Thymeleaf改造部门管理案例.assets/image-20261015203123539.png)
+
+# 

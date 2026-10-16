@@ -6,6 +6,16 @@
     <title>部门管理系统 - 部门列表</title>
     <!--/dept/css/list.css的动态写法-->
     <link rel="stylesheet" th:href="@{/css/list.css}">
+    <script th:inline="javascript">
+          function deleteById(elem) {
+             //获取项目根路径，js里面有点怪
+             let cntPath = /*[[@{/}]]*/
+             let id = elem.getAttribute("data-id")
+             if(window.confirm("你确定要删除数据吗，不可恢复哦")){
+                document.location.href=cntPath+"delete?id="+id
+             }
+          }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -31,7 +41,9 @@
                     <td>
                         <a th:href="@{/detail(id=${dept.deptNo})}" class="action-btn view-btn">查看</a>
                         <a th:href="@{/edit(id=${dept.deptNo})}" class="action-btn edit-btn">修改</a>
-                        <a href="javascript:void(0)" class="action-btn delete-btn" onclick="">删除</a>
+                        <!--这个this是前端的this，代表当前节点，和thymeleaf没有关系-->
+                        <a href="javascript:void(0)" th:data-id="${dept.deptNo}" class="action-btn delete-btn"
+                                                                                   onclick="deleteById(this)">删除</a>
                     </td>
                 </tr>
             </tbody>
@@ -41,5 +53,6 @@
             <a href="@{/logout}">退出登录</a>
         </div>
     </div>
+
 </body>
 </html>
