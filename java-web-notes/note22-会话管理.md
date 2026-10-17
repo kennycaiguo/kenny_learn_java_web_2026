@@ -1629,5 +1629,9 @@ DELETE FROM user_remember_tokens WHERE expires_at < NOW() OR revoked = 1;
 
 ![image-20261016190911938](./note22-会话管理.assets/image-20261016190911938.png)
 
-### 注意：网银系统的session过期时间非常短，只有5分钟
+### 注意：网银系统的session过期时间非常短，只有5分钟，如果你需要你网站安全级别高一点，就可以把session的过期时间设置小一点。
+
+## 8.session也有setAttribute，getAttribute和removeAttribute方法，session持久化，需要编写一个监听器实现HttpSessionListener接口
+
+![image-20261016193025064](./note22-会话管理.assets/image-20261016193025064.png)
 
