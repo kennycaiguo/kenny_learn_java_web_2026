@@ -37,12 +37,13 @@ public class LoginServlet extends HttpServlet {
                     loginSucess = Argon2PasswordUtil.verifyPassword(password,hashedPassword);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
         //根据上面比较的结果进行处理
         if(loginSucess){
+            //登录成功后需要把用户名设置到session
+            req.getSession().setAttribute("username",username); //getSession()里面不能传递false，因为这里我们要求必须获取session
             //登录成功,必须用重定向,不能用转发,因为/list路径只支持get请求,而这里是post请求转发后还是post请求,会引发405错误
             resp.sendRedirect(req.getContextPath()+"/list");
         } else {

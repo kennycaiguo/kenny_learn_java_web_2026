@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.kenny.dept.dao.DeptDao;
 import org.kenny.dept.dao.impl.DeptDaoImpl;
 import org.kenny.dept.entity.Dept;
@@ -21,12 +22,13 @@ public class DeptListServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        //获取所有部门信息
-        deptDao = new DeptDaoImpl();
-        List<Dept> depts = deptDao.selectAll();
-        req.setAttribute("depts", depts);
-        req.setAttribute("template","list");
-        //转发到/view
-        req.getRequestDispatcher("/view").forward(req,resp);
+            //获取所有部门信息
+            deptDao = new DeptDaoImpl();
+            List<Dept> depts = deptDao.selectAll();
+            req.setAttribute("depts", depts);
+            req.setAttribute("template","list");
+            //转发到/view
+            req.getRequestDispatcher("/view").forward(req,resp);
+
     }
 }
