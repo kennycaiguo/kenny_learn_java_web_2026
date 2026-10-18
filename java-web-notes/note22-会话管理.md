@@ -1725,3 +1725,58 @@ DELETE FROM user_remember_tokens WHERE expires_at < NOW() OR revoked = 1;
 ## 1.把web15项目重新部署到服务器，注意：部署的项目根路径是/dept
 
 ![image-20261017162933321](./note22-会话管理.assets/image-20261017162933321.png)
+
+## 2.此时如果我们在浏览器里面直接输入部门列表的链接，是可以直接访问列表页面的数据的。这个其实不合理，我们需要当用户登录了才能让他跳转到list页面。我们需要修改LoginServlet，在用户登录成功后把用户名写到session中，然后需要在list页面检测是否有这个用户名。我们修改LoginServlet的代码如下
+
+![image-20261017170129165](./note22-会话管理.assets/image-20261017170129165.png)
+
+## 3.然后我们需要在DeptListServlet的代码里面添加检查用户名的代码，如果用户名为空，跳转到登录页面，但是其他的页面也需要这个功能所以，我们需要写一个过滤器LoginCheckFilter
+
+![image-20261017192343316](./note22-会话管理.assets/image-20261017192343316.png)
+
+### 代码如下
+
+```
+package org.kenny.dept.filter;
+
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
+
+@WebFilter("/*")
+public class LoginCheckFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        //转换
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
+        String servletPath = req.getServletPath();
+        //判断用户是否登录
+        // /*会拦截所有路径包括/，这会导致网站无法正常执行，我们需要给/css ，/login和/index放行，次数需要判断是否是/index和/login 和 /css
+        //如果是这些路径，不需要拦截，此外，图片，js文件都需要放行
+        HttpSession session = req.getSession(false); //这里false表示只获取当前session，获取不到不新建，也就是指定使用登录时创建的session对象
+        if("/index".equals(servletPath) || "/login".equals(servletPath) || servletPath.startsWith("/css")
+                || (session!=null && session.getAttribute("username") != null)) {
+                chain.doFilter(request,response); //这里不能够使用自己的doFilter.而需要使用chain.doFilter
+        } else{
+            resp.sendRedirect(req.getContextPath()+"/index");
+        }
+    }
+}
+
+```
+
+### 此时，你没有登录的话，访问/list，/detail，/delete，/edit都会被重定向到/index。登录后就没有这个问题
+
+
+
+
+
+
+
+
+
