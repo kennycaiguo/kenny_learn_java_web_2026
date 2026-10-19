@@ -1,0 +1,23 @@
+.user-info {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+.user-name {
+    margin-right: 15px;
+    color: #555;
+    font-weight: 600;
+}
+.user-actions a {
+    color: #777;
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 10px;
+}
+.user-actions a:hover {
+    color: #333;
+    text-decoration: underline;
+}

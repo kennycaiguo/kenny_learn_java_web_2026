@@ -5,9 +5,19 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>部门管理系统 - 修改部门</title>
     <link rel="stylesheet" th:href="@{/css/edit.css}">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
 </head>
 <body>
     <div class='container'>
+
+        <!-- 新增的用户信息栏 -->
+        <div class="user-info">
+            <span class="user-name" th:text="|当前用户:${session.username}|">当前用户：管理员</span>
+            <div class="user-actions">
+                <a th:href="@{/logout}">退出登录</a>
+            </div>
+        </div>
+
         <div class='header'>
             <h1>修改部门信息</h1>
             <a th:href="@{/list}" class='back-btn'>返回列表</a>

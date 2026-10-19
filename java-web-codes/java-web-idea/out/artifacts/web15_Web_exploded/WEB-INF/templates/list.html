@@ -6,10 +6,12 @@
     <title>部门管理系统 - 部门列表</title>
     <!--/dept/css/list.css的动态写法-->
     <link rel="stylesheet" th:href="@{/css/list.css}">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+
     <script th:inline="javascript">
           function deleteById(elem) {
              //获取项目根路径，js里面有点怪
-             let cntPath = /*[[@{/}]]*/
+             let cntPath = /*[[@{/}]]*/;
              let id = elem.getAttribute("data-id")
              if(window.confirm("你确定要删除数据吗，不可恢复哦")){
                 document.location.href=cntPath+"delete?id="+id
@@ -19,6 +21,14 @@
 </head>
 <body>
     <div class="container">
+        <!-- 新增的用户信息栏 -->
+        <div class="user-info">
+            <span class="user-name" th:text="|当前用户:${session.username}|">当前用户：管理员</span>
+            <div class="user-actions">
+                <a th:href="@{/logout}">退出登录</a>
+            </div>
+        </div>
+
         <div class="header">
             <h1>部门列表</h1>
             <a th:href="@{/add}" class="add-btn">添加部门</a>
@@ -49,9 +59,9 @@
             </tbody>
         </table>
         
-        <div class="logout">
-            <a href="@{/logout}">退出登录</a>
-        </div>
+<!--        <div class="logout">-->
+<!--            <a href="@{/logout}">退出登录</a>-->
+<!--        </div>-->
     </div>
 
 </body>

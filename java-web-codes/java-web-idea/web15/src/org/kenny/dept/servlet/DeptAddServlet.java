@@ -14,6 +14,7 @@ public class DeptAddServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setAttribute("template", "add");
+        String username = (String)req.getSession().getAttribute("username");
         req.getRequestDispatcher("/view").forward(req, resp);
     }
 }

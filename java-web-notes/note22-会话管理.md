@@ -622,7 +622,7 @@ public class CheckLoginFilter implements Filter {
 ```html
 <!-- 新增的用户信息栏 -->
 <div class="user-info">
-  <span c2lass="user-name">当前用户：管理员</span>
+  <span class="user-name">当前用户：管理员</span>
   <div class="user-actions">
     <a href="#">退出登录</a>
   </div>
@@ -1772,9 +1772,157 @@ public class LoginCheckFilter implements Filter {
 
 ### 此时，你没有登录的话，访问/list，/detail，/delete，/edit都会被重定向到/index。登录后就没有这个问题
 
+# 演练4.完整检查登录的过滤器
+
+## 1.我们需要重新检查一下我们的过滤器，一下情况不要拦截
+
+1》用户正在登录
+
+2》用户访问登录页面
+
+3》访问图片css等等精通资源
+
+4》已经登录了的用户不需要拦截
+
+## 2.我们把LoginCheckFilter的代码改为下面的样子
+
+```
+package org.kenny.dept.filter;
+
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
+
+@WebFilter("/*")
+public class LoginCheckFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        //转换
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
+        String servletPath = req.getServletPath();
+        //判断用户是否登录
+        // /*会拦截所有路径包括/，这会导致网站无法正常执行，我们需要给/css ，/login和/index放行，次数需要判断是否是/index和/login 和 /css
+        //如果是这些路径，不需要拦截，此外，图片，js文件都需要放行
+        HttpSession session = req.getSession(false); //这里false表示只获取当前session，获取不到不新建，也就是指定使用登录时创建的session对象
+        if("/index".equals(servletPath) || "/login".equals(servletPath) || servletPath.startsWith("/css")||servletPath.startsWith("/images")
+            || servletPath.startsWith("/js")    || (session!=null && session.getAttribute("username") != null)) {
+                chain.doFilter(request,response); //这里不能够使用自己的doFilter.而需要使用chain.doFilter
+        } else{
+            //重定向，需要判断"/index".equals(servletPath)
+            //resp.sendRedirect(req.getContextPath()+"/index");
+            //这里可以使用转发，转发它不走过滤器,不需要判断"/index".equals(servletPath)
+            //req.setAttribute("template","index");
+            //req.getRequestDispatcher("/view").forward(request,response);
+            //也可以这么写
+            req.getRequestDispatcher("/index").forward(request,response);
+        }
+    }
+}
+
+```
+
+### 注意，getServletPath方法返回的路径不带项目名称它只是返回/list这样子的路径
+
+# 演练5.在每一个页面显示已经登录的用户
+
+## 1.首先需要在css文件夹里面新建一个common.css文件，内容参考上面的笔记
+
+## 2.在 `add.html`、`list.html`、`edit.html`、`detail.html`里面添加显示用户的代码和引入common.css文件
+
+![image-20261019125624973](./note22-会话管理.assets/image-20261019125624973.png)
+
+![image-20261019125839709](./note22-会话管理.assets/image-20261019125839709.png)
+
+![image-20261019130226834](./note22-会话管理.assets/image-20261019130226834.png)
+
+![image-20261019130414926](./note22-会话管理.assets/image-20261019130414926.png)
+
+![image-20261019130652142](./note22-会话管理.assets/image-20261019130652142.png)
+
+## 3.然后把用户名一栏的数据使用动态获取的数据。可以在session里面获取用户名，只需要把th:text的内容拷贝粘贴到其他页面即可
+
+![image-20261019141637216](./note22-会话管理.assets/image-20261019141637216.png)
+
+### 效果，其它页面也是一样的效果
+
+![image-20261019141839332](./note22-会话管理.assets/image-20261019141839332.png)
+
+# 演练6.实现退出系统功能
+
+## 1.在退出登录超链接里面把href修改一下，然后复制粘贴到其它页面
+
+![image-20261019144156061](./note22-会话管理.assets/image-20261019144156061.png)
+
+## 2.然后我们需要创建一个LogoutServlet，继承HttpServlet，实现doGet方法，代码比较简单，销毁session对象然后重定向到登录页面
+
+![image-20261019145401513](./note22-会话管理.assets/image-20261019145401513.png)
+
+### 效果：先登录，
+
+![image-20261019145449205](./note22-会话管理.assets/image-20261019145449205.png)
 
 
 
+### 然后退出
+
+![image-20261019145510322](./note22-会话管理.assets/image-20261019145510322.png)
+
+![image-20261019145525647](./note22-会话管理.assets/image-20261019145525647.png)
+
+# 演练7 cookie学习
+
+## 1.还是是web16模块，新建一个MyCookieServlet,继承HttpServlet，重写doGet方法，设置请求路径为/cookie，然后我们创建一个Cookie，先不设置属性，然后直接响应给客户端，看看它有没有默认值
+
+![image-20261019153603402](./note22-会话管理.assets/image-20261019153603402.png)
+
+## 2.重新部署到服务器，然后启动服务器，在浏览器中输入http://localhost:8080/web16/cookie并且刷新，然后打开调试工具，点击网络选项卡，就可以看到cookie
+
+![image-20261019155029767](./note22-会话管理.assets/image-20261019155029767.png)
+
+
+
+## 3.点击应用程序选项卡，然后点击Cookies，可以cookie关联的路径是/web16，也就是说访问所有/web16的子路径都会携带这个cookie，默认的生命周期是会话，也就是关闭浏览器，就会销毁cookie
+
+![image-20261019155356298](./note22-会话管理.assets/image-20261019155356298.png)
+
+
+
+## 4.cookie默认值的以及他的含义如图
+
+![image-20261019160726568](./note22-会话管理.assets/image-20261019160726568.png)
+
+## 5.下面我们来练习手动设置一下
+
+![image-20261019162306117](./note22-会话管理.assets/image-20261019162306117.png)
+
+### 重启服务器，清除原来的cookie思考，然后访问http://192.168.100.138:8080/web16/cookie, 效果如下，在网络选项卡里面
+
+![image-20261019163221349](./note22-会话管理.assets/image-20261019163221349.png)
+
+### 在应用程序选项卡里面
+
+![image-20261019163049739](./note22-会话管理.assets/image-20261019163049739.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 实现保持长时间登录状态，(安全级别高的系统没有这个功能，如网银)
+
+## 我们的dept项目目前还没有保持长时间登录的功能，也就是7天或者更多天免登录，这个功能需要cookie的帮助才能实现。后面，我们会增加token使它更加安全。
 
 
 
