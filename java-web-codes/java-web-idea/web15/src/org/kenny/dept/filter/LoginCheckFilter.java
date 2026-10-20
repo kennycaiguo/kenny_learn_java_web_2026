@@ -2,6 +2,7 @@ package org.kenny.dept.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -15,6 +16,19 @@ public class LoginCheckFilter implements Filter {
         //转换
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
+        //先获取7天过期的cookie，看看有没有username实现，如果有就获取他的值然后保存到session，也就是放行
+        Cookie[] cookies = req.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("username")) {
+                    String username = cookie.getValue();
+                    req.getSession().setAttribute("username", username);
+                    chain.doFilter(request, response);
+                    return; //既然是放行了，下面登录的代码就没有必要执行了，这一句非常重要。
+                }
+            }
+        }
+        //没有就必须登录
         String servletPath = req.getServletPath();
         //判断用户是否登录
         // /*会拦截所有路径包括/，这会导致网站无法正常执行，我们需要给/css ，/login和/index放行，次数需要判断是否是/index和/login 和 /css
