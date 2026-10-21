@@ -2,10 +2,7 @@ package org.kenny.dept.servlet;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
@@ -19,6 +16,11 @@ public class LogoutServlet extends HttpServlet {
         if(session != null) {
             session.invalidate(); //销毁session
         }
+        //删除cookie
+        Cookie cookie= new Cookie("username", ""); //名称和我们当前cookie的键名称必须一致，value可以不写
+        cookie.setMaxAge(0);
+        resp.addCookie(cookie);
+
         //重定向到登录页面
         resp.sendRedirect(req.getContextPath());
     }
