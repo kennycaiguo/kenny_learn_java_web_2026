@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部门管理系统 - 部门详情</title>
+    <link rel="stylesheet" th:href="@{/css/detail.css}">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+</head>
+<body>
+    <div class="container">
+        <!-- 新增的用户信息栏 -->
+        <div class="user-info">
+            <span class="user-name" th:text="|当前用户:${session.username}|">当前用户：管理员</span>
+            <div class="user-actions">
+                <a th:href="@{/logout}">退出登录</a>
+            </div>
+        </div>
+
+        <div class="header">
+            <h1>部门详细信息</h1>
+            <a th:href="@{/list}" class="back-btn">返回列表</a>
+        </div>
+        
+        <div class="detail-card">
+            <div class="detail-row">
+                <div class="detail-label" >部门编号</div>
+                <div class="detail-value" th:text="${dept.deptNo}">D001</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">部门名称</div>
+                <div class="detail-value" th:text="${dept.dName}">技术部</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">部门地理位置</div>
+                <div class="detail-value" th:text="${dept.loc}">北京总部A座3层</div>
+            </div>
+        </div>
+        
+        <div class="action-btns">
+            <a th:href="@{/edit(id=${dept.deptNo})}" class="edit-btn">编辑部门信息</a>
+        </div>
+    </div>
+</body>
+</html>

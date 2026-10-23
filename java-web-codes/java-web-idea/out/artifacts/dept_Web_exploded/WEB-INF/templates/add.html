@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部门管理系统 - 添加部门</title>
+    <link rel="stylesheet" th:href="@{/css/add.css}">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+</head>
+<body>
+    <div class="container">
+        <!-- 新增的用户信息栏 -->
+        <div class="user-info">
+            <span class="user-name" th:text="|当前用户:${session.username}|">当前用户：管理员</span>
+            <div class="user-actions">
+                <a th:href="@{/logout}">退出登录</a>
+            </div>
+        </div>
+        <div class="header">
+            <h1>添加新部门</h1>
+            <a th:href="@{/list}" class="back-btn">返回列表</a>
+        </div>
+        
+        <form th:action="@{/save}" method="post">
+            <div class="form-group">
+                <label for="deptName">部门名称</label>
+                <input type="text" id="deptName" name="deptName" placeholder="请输入部门名称" required>
+            </div>
+            <div class="form-group">
+                <label for="location">部门地理位置</label>
+                <input type="text" id="location" name="location" placeholder="请输入部门地理位置" required>
+            </div>
+            
+            <div class="footer">
+                <button type="submit" class="submit-btn">保存</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

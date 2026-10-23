@@ -1296,7 +1296,7 @@ public class CheckLoginFilter implements Filter {
                         ResultSet rs = null;
                         try {
                             conn = DbUtils.getConnection();
-                            String sql = "select u.username from user_remember_tokens urt join t_user u on urt.user_id=u.id where urt.token=? and urt.fingerprint=? and urt.expires_at > now() and urt.revoked = '0'";
+                            String sql = "select u.username from user_remember_tokens urt join t_user u on urt.user_id=u.id where urt.token=? and urt.series=? and urt.fingerprint=? and urt.expires_at > now() and urt.revoked = '0'";
                             ps = conn.prepareStatement(sql);
                             ps.setString(1, token);
                             String ip = request.getRemoteAddr();
@@ -1998,6 +1998,73 @@ public class LoginCheckFilter implements Filter {
 
 ![image-20261020175237495](./note22-会话管理.assets/image-20261020175237495.png)
 
+### 也可以这么写
+
+```
+package org.kenny.dept.filter;
+
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
+
+@WebFilter("/*")
+public class LoginCheckFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        //转换
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
+        Cookie[] cookies = req.getCookies();
+//        if (cookies != null) {
+//            for (Cookie cookie : cookies) {
+//                if (cookie.getName().equals("username")) {
+//                    String username = cookie.getValue();
+//                    req.getSession().setAttribute("username", username);
+//                    chain.doFilter(request, response);
+//                    return; //既然是放行了，下面登录的代码就没有必要执行了，这一句非常重要。
+//                }
+//            }
+//        }
+        //没有就必须登录
+        String servletPath = req.getServletPath();
+        //判断用户是否登录
+        // /*会拦截所有路径包括/，这会导致网站无法正常执行，我们需要给/css ，/login和/index放行，次数需要判断是否是/index和/login 和 /css
+        //如果是这些路径，不需要拦截，此外，图片，js文件都需要放行
+        HttpSession session = req.getSession(false);//这里false表示只获取当前session，获取不到不新建，也就是指定使用登录时创建的session对象
+
+        if("/index".equals(servletPath) || "/login".equals(servletPath) || servletPath.startsWith("/css")||servletPath.startsWith("/images")
+                || servletPath.startsWith("/js")    || (session!=null && session.getAttribute("username") != null)) {
+            chain.doFilter(request,response); //这里不能够使用自己的doFilter.而需要使用chain.doFilter
+        } else if(cookies!=null && cookies.length>0){
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("username")) {
+                    String username = cookie.getValue();
+                    req.getSession().setAttribute("username", username);
+                    chain.doFilter(request, response);
+                    break;
+                }
+            }
+        } else {
+            //重定向，需要判断"/index".equals(servletPath)
+            //resp.sendRedirect(req.getContextPath()+"/index");
+            //这里可以使用转发，转发它不走过滤器,不需要判断"/index".equals(servletPath)
+            //req.setAttribute("template","index");
+            //req.getRequestDispatcher("/view").forward(request,response);
+            //也可以这么写
+            req.getRequestDispatcher("/index").forward(request,response);
+        }
+    }
+}
+
+```
+
+
+
 ### 重启服务器，就会展示列表页面，因为那个7天有效的cookie还是在
 
 ![image-20261020175347002](./note22-会话管理.assets/image-20261020175347002.png)
@@ -2034,7 +2101,7 @@ public class LoginCheckFilter implements Filter {
 
 ### 在实际开发中不会使用cookie来记录登录状态，也就是这个演练只是用来学习的。
 
-# 演练9.使用token实现x天免登录
+# token原理学习已经相关jar包和类的准备
 
 ## 上面使用cookie来实现7天免登录，虽然简单，但是安全性很差，因为管理员账号一般叫admin或者root或者administrator，很容易伪造cookie。使用token就比较好
 
@@ -2076,13 +2143,270 @@ public class LoginCheckFilter implements Filter {
 
 ![image-20261021155740337](./note22-会话管理.assets/image-20261021155740337.png)
 
+### series和fingerprint可以用来防止token泄漏
+
 ![image-20261021155849042](./note22-会话管理.assets/image-20261021155849042.png)
 
 
 
-### series就是给浏览器生成的唯一标识
+### series就是给浏览器生成的唯一标识，fingerprint的作用如下
+
+![image-20261022113749372](./note22-会话管理.assets/image-20261022113749372.png)
 
 
+
+# 演练9.使用token实现x天免登录
+
+## 1.回到模块web15，打开LoginServlet,在这里处理用户登录成功后token的生成以及保存修改后的代码如下
+
+```
+package org.kenny.dept.servlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.kenny.dept.dao.DeptDao;
+import org.kenny.dept.dao.impl.DeptDaoImpl;
+import org.kenny.dept.util.Argon2PasswordUtil;
+import org.kenny.dept.util.DbUtils;
+import org.kenny.dept.util.TokenGenerator;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //获取用户名和密码
+        String username = req.getParameter("username");
+        String password = req.getParameter("password");
+        Integer user_id = null;
+        //直接使用Jdbc来验证用户名和密码
+        String sql = "select password,id from t_user where username=?";
+        boolean loginSucess = false;
+        try(Connection conn = DbUtils.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);){
+            ps.setString(1,username);
+            try(ResultSet rs = ps.executeQuery()){
+                if(rs.next()){
+                    //获取数据库里面加密了的密码
+                    String hashedPassword = rs.getString(1);
+                    user_id = Integer.parseInt(rs.getString(2)); //查询密码的时候把用户id也查到
+                    //把密文密码和用户传递的密码加密后的结果进行比较
+                    loginSucess = Argon2PasswordUtil.verifyPassword(password,hashedPassword);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //根据上面比较的结果进行处理
+        if(loginSucess){
+            //登录成功后需要把用户名设置到session
+            req.getSession().setAttribute("username",username); //getSession()里面不能传递false，因为这里我们要求必须获取session
+            //登录成功,必须用重定向,不能用转发,因为/list路径只支持get请求,而这里是post请求转发后还是post请求,会引发405错误
+            // 要实现7天免登录，需要创建cookie，把用户名设置到cookie
+            String insertSql = "insert into user_remember_tokens(user_id,token,series,fingerprint,expires_at) values(?,?,?,?,?);";
+            //生成token并且把它保存到数据库的user_remember_tokens数据表中
+            try(Connection conn = DbUtils.getConnection();
+                PreparedStatement ps = conn.prepareStatement(insertSql);){
+                //传递值给形参
+                ps.setLong(1,user_id);
+                String token = TokenGenerator.generateSecureToken();
+                ps.setString(2,token);
+                //生成series，使用GUID
+                String series = UUID.randomUUID().toString();
+                ps.setString(3,series);
+                //获取ip，浏览器表示用来生成指纹
+                String ip = req.getRemoteAddr();
+                String userAgent = req.getHeader("User-Agent");
+                String fingerprint = DigestUtils.sha256Hex(ip+userAgent+"salt");
+                ps.setString(4,fingerprint);
+                LocalDateTime expires_at = LocalDateTime.now().plusDays(30);
+                ps.setTimestamp(5, Timestamp.valueOf(expires_at)); //设置30天有效
+                //保存数据
+                int count = ps.executeUpdate();
+                if(count>0){
+                    //保存成功后token和series设置到cookie响应给浏览器
+                    Cookie cookie = new Cookie("remember",series+":"+token);
+                    cookie.setMaxAge(60*60*24*30); //过期时间为30天，60*60*24*30
+                    cookie.setPath(req.getContextPath()); //这个其实不用设置，有默认值
+                    cookie.setHttpOnly(true); //防止xxs攻击
+                    if(req.isSecure()){
+                        cookie.setSecure(true); //如果是https需要设置这个
+                    }
+                    resp.addCookie(cookie);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            resp.sendRedirect(req.getContextPath()+"/list");
+        } else {
+            //登录失败
+            req.setAttribute("errorMsg","用户名或者密码错误");
+            req.setAttribute("template","index");
+            req.getRequestDispatcher("/view").forward(req,resp);
+
+        }
+    }
+}
+
+```
+
+### 测试一下，打开navicat然后打开user_remember_tokens数据表，此时是空的
+
+![image-20261022131954288](./note22-会话管理.assets/image-20261022131954288.png)
+
+### 然后重启服务器，进入登录页面,填写用户名密码点击登录
+
+![image-20261022132133332](./note22-会话管理.assets/image-20261022132133332.png)
+
+
+
+### 登录成功后,user_remember_tokens就有数据了
+
+![image-20261022143712071](./note22-会话管理.assets/image-20261022143712071.png)
+
+### 打开调试工具,也看到我们设置remember cookie
+
+## 2.然后我们需要修改LoginCheckFilter的代码,在里面添加token验证功能,修改后的代码如下
+
+```
+package org.kenny.dept.filter;
+
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.kenny.dept.util.DbUtils;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+@WebFilter("/*")
+public class LoginCheckFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        //转换
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
+        Cookie[] cookies = req.getCookies();
+        String servletPath = req.getServletPath();
+        //判断用户是否登录
+        // /*会拦截所有路径包括/，这会导致网站无法正常执行，我们需要给/css ，/login和/index放行，次数需要判断是否是/index和/login 和 /css
+        //如果是这些路径，不需要拦截，此外，图片，js文件都需要放行
+        HttpSession session = req.getSession(false);//这里false表示只获取当前session，获取不到不新建，也就是指定使用登录时创建的session对象
+
+        if("/index".equals(servletPath) || "/login".equals(servletPath) || servletPath.startsWith("/css")||servletPath.startsWith("/images")
+                || servletPath.startsWith("/js") || (session!=null && session.getAttribute("username") != null)) {
+//            System.out.println("ok");
+            chain.doFilter(req,resp); //这里不能够使用自己的doFilter.而需要使用chain.doFilter
+        } else if(cookies!=null && cookies.length>0){
+            System.out.println("else if...");
+            //从cookie中获取token和series
+            String series = null;
+            String token = null;
+            for (Cookie cookie : cookies) {
+                if ("remember".equals(cookie.getName())) {
+                    String data = cookie.getValue();
+                    series = data.split(":")[0];
+                    token = data.split(":")[1];
+                    break;
+                }
+            }
+//            boolean isLogin = false;
+            if(series !=null && token !=null){
+                //验证token的有效性，需要查询数据库的user_remember_tokens数据表
+                String sql = "select u.username from user_remember_tokens urt join t_user u on urt.user_id=u.id where urt.token=? and urt.series=? and urt.fingerprint=? and urt.expires_at > now() and urt.revoked = '0'";
+                try(Connection conn = DbUtils.getConnection();
+                    PreparedStatement ps = conn.prepareStatement(sql);){
+                    ps.setString(1, token);
+                    ps.setString(2, series);
+                    String ip = req.getRemoteAddr();
+                    String userAgent = req.getHeader("User-Agent");
+                    String fingerprint = DigestUtils.sha256Hex(ip+userAgent+"salt");
+                    ps.setString(3, fingerprint);
+                    try(ResultSet rs = ps.executeQuery();){
+                        if(rs.next()){
+                            //能够进入这里说明token有效
+//                            isLogin = true; //说明登录成功
+                            HttpSession s = req.getSession();
+                            s.setAttribute("username", rs.getString("username"));
+                            chain.doFilter(req, resp);
+                        } else {
+                            //token无效
+                            //删除客户端token，将数据库里面的revoke字段设置为1
+                            String sql1 = "update user_remember_tokens set revoked=1 where token=?";
+                            try(PreparedStatement ps1 = conn.prepareStatement(sql1);){
+                                ps1.setString(1, token);
+                                int count = ps1.executeUpdate();
+                                if(count>0){
+                                    //删除浏览器客户端的token
+                                    Cookie cookie = new Cookie("remember", "");
+                                    cookie.setMaxAge(0);
+                                    resp.addCookie(cookie);
+                                    //跳转到登录页面
+                                    resp.sendRedirect(req.getContextPath()+"/index");
+                                }
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+
+
+        } else {
+            //重定向，需要判断"/index".equals(servletPath)
+            resp.sendRedirect(req.getContextPath()+"/index");
+            //这里可以使用转发，转发它不走过滤器,不需要判断"/index".equals(servletPath)
+            //req.setAttribute("template","index");
+            //req.getRequestDispatcher("/view").forward(request,response);
+            //也可以这么写
+            //req.getRequestDispatcher("/index").forward(request,response);
+        }
+    }
+}
+
+```
+
+### 测试,把浏览器的cookie数据删除,把user_remember_tokens表的数据删除,查询启动服务器从0开始测试
+
+![image-20261022162333863](./note22-会话管理.assets/image-20261022162333863.png)
+
+
+
+![image-20261022162428888](./note22-会话管理.assets/image-20261022162428888.png)
+
+![image-20261022162456531](./note22-会话管理.assets/image-20261022162456531.png)
+
+![image-20261022162611416](./note22-会话管理.assets/image-20261022162611416.png)
+
+![image-20261022162625081](./note22-会话管理.assets/image-20261022162625081.png)
+
+### 然后关闭浏览器重新打开,还有是有效的
+
+![image-20261022181928778](./note22-会话管理.assets/image-20261022181928778.png)
 
 
 
