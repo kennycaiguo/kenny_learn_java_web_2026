@@ -33,7 +33,7 @@ public class LoginCheckFilter implements Filter {
 //            System.out.println("ok");
             chain.doFilter(req,resp); //这里不能够使用自己的doFilter.而需要使用chain.doFilter
         } else if(cookies!=null && cookies.length>0){
-            System.out.println("else if...");
+//            System.out.println("else if...");
             //从cookie中获取token和series
             String series = null;
             String token = null;
@@ -71,14 +71,12 @@ public class LoginCheckFilter implements Filter {
                             try(PreparedStatement ps1 = conn.prepareStatement(sql1);){
                                 ps1.setString(1, token);
                                 int count = ps1.executeUpdate();
-                                if(count>0){
-                                    //删除浏览器客户端的token
-                                    Cookie cookie = new Cookie("remember", "");
-                                    cookie.setMaxAge(0);
-                                    resp.addCookie(cookie);
-                                    //跳转到登录页面
-                                    resp.sendRedirect(req.getContextPath()+"/index");
-                                }
+                                //删除浏览器客户端的token
+                                Cookie cookie = new Cookie("remember", "");
+                                cookie.setMaxAge(0);
+                                resp.addCookie(cookie);
+                                //跳转到登录页面
+                                resp.sendRedirect(req.getContextPath()+"/index");
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -89,11 +87,12 @@ public class LoginCheckFilter implements Filter {
                     throw new RuntimeException(e);
                 }
 
+            } else{
+                //有cookie，但是token是空的，说明需要登录生成token
+                resp.sendRedirect(req.getContextPath()+"/index");
             }
 
-
         } else {
-            //重定向，需要判断"/index".equals(servletPath)
             resp.sendRedirect(req.getContextPath()+"/index");
             //这里可以使用转发，转发它不走过滤器,不需要判断"/index".equals(servletPath)
             //req.setAttribute("template","index");

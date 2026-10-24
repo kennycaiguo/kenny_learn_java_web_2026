@@ -2408,6 +2408,362 @@ public class LoginCheckFilter implements Filter {
 
 ![image-20261022181928778](./note22-会话管理.assets/image-20261022181928778.png)
 
+## 3.此外，我们还需要考虑一种可能，就是用户有cookie，但是token是空的，此时我们也需要把它重定向到登录页面让他生成token，此外我们在删除客户端token的代码也需要改进一下，修改后的LoginCheckFilter代码如下
+
+```
+package org.kenny.dept.filter;
+
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.kenny.dept.util.DbUtils;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+@WebFilter("/*")
+public class LoginCheckFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        //转换
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
+        Cookie[] cookies = req.getCookies();
+        String servletPath = req.getServletPath();
+        //判断用户是否登录
+        // /*会拦截所有路径包括/，这会导致网站无法正常执行，我们需要给/css ，/login和/index放行，次数需要判断是否是/index和/login 和 /css
+        //如果是这些路径，不需要拦截，此外，图片，js文件都需要放行
+        HttpSession session = req.getSession(false);//这里false表示只获取当前session，获取不到不新建，也就是指定使用登录时创建的session对象
+
+        if("/index".equals(servletPath) || "/login".equals(servletPath) || servletPath.startsWith("/css")||servletPath.startsWith("/images")
+                || servletPath.startsWith("/js") || (session!=null && session.getAttribute("username") != null)) {
+//            System.out.println("ok");
+            chain.doFilter(req,resp); //这里不能够使用自己的doFilter.而需要使用chain.doFilter
+        } else if(cookies!=null && cookies.length>0){
+            System.out.println("else if...");
+            //从cookie中获取token和series
+            String series = null;
+            String token = null;
+            for (Cookie cookie : cookies) {
+                if ("remember".equals(cookie.getName())) {
+                    String data = cookie.getValue();
+                    series = data.split(":")[0];
+                    token = data.split(":")[1];
+                    break;
+                }
+            }
+//            boolean isLogin = false;
+            if(series !=null && token !=null){
+                //验证token的有效性，需要查询数据库的user_remember_tokens数据表
+                String sql = "select u.username from user_remember_tokens urt join t_user u on urt.user_id=u.id where urt.token=? and urt.series=? and urt.fingerprint=? and urt.expires_at > now() and urt.revoked = '0'";
+                try(Connection conn = DbUtils.getConnection();
+                    PreparedStatement ps = conn.prepareStatement(sql);){
+                    ps.setString(1, token);
+                    ps.setString(2, series);
+                    String ip = req.getRemoteAddr();
+                    String userAgent = req.getHeader("User-Agent");
+                    String fingerprint = DigestUtils.sha256Hex(ip+userAgent+"salt");
+                    ps.setString(3, fingerprint);
+                    try(ResultSet rs = ps.executeQuery();){
+                        if(rs.next()){
+                            //能够进入这里说明token有效
+//                            isLogin = true; //说明登录成功
+                            HttpSession s = req.getSession();
+                            s.setAttribute("username", rs.getString("username"));
+                            chain.doFilter(req, resp);
+                        } else {
+                            //token无效
+                            //删除客户端token，将数据库里面的revoke字段设置为1
+                            String sql1 = "update user_remember_tokens set revoked=1 where token=?";
+                            try(PreparedStatement ps1 = conn.prepareStatement(sql1);){
+                                ps1.setString(1, token);
+                                int count = ps1.executeUpdate();
+                                //删除浏览器客户端的token
+                                Cookie cookie = new Cookie("remember", "");
+                                cookie.setMaxAge(0);
+                                resp.addCookie(cookie);
+                                //跳转到登录页面
+                                resp.sendRedirect(req.getContextPath()+"/index");
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            } else{
+                //有cookie，但是token是空的，说明需要登录生成token
+                resp.sendRedirect(req.getContextPath()+"/index");
+            }
+
+        } else {
+            resp.sendRedirect(req.getContextPath()+"/index");
+            //这里可以使用转发，转发它不走过滤器,不需要判断"/index".equals(servletPath)
+            //req.setAttribute("template","index");
+            //req.getRequestDispatcher("/view").forward(request,response);
+            //也可以这么写
+            //req.getRequestDispatcher("/index").forward(request,response);
+        }
+    }
+}
+
+```
+
+### 重新来测试一下，把数据表user_remember_tokens的数据删除，把cookie也删除
+
+![image-20261023112151604](./note22-会话管理.assets/image-20261023112151604.png)
+
+### 登录成功后，数据库有数据
+
+![image-20261023112225905](./note22-会话管理.assets/image-20261023112225905.png)
+
+### cookie中也有数据
+
+![image-20261023112312227](./note22-会话管理.assets/image-20261023112312227.png)
+
+### 然后我们把有token的cookie删除
+
+![image-20261023112428884](./note22-会话管理.assets/image-20261023112428884.png)
+
+### 在没有关闭浏览器的情况下，仍然不需要登录，但是关闭了浏览器，就必须登录
+
+![image-20261023112559993](./note22-会话管理.assets/image-20261023112559993.png)
+
+### 登录成功后，在30天内不需要重新登录
+
+### 然后我们在数据库里面把token的实际改为已经过期
+
+![image-20261023113156495](./note22-会话管理.assets/image-20261023113156495.png)
+
+### 关闭浏览器并且重新打开，输入： http://localhost:8080/dept/list， 又会弹出登录表单
+
+![image-20261023113335648](./note22-会话管理.assets/image-20261023113335648.png)
+
+### 此时我们刷新数据库，发现token被撤销了，工作正常
+
+![image-20261023113506373](./note22-会话管理.assets/image-20261023113506373.png)
+
+### 重新登录，又会生成新的token
+
+![image-20261023113553969](./note22-会话管理.assets/image-20261023113553969.png)
+
+![image-20261023113628708](./note22-会话管理.assets/image-20261023113628708.png)
+
+## 4.然后我们需要修改/index也就是对应IndexServlet的内容，因为我们以前不是根据token来判断的，所以现在存在一个比较奇怪的现象，就是已经登录了，并且有token，每一次输入/或者/index都需要重新登录，我们需要修复这个问题修改后的IndexServlet的代码如下
+
+```
+package org.kenny.dept.servlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.kenny.dept.util.DbUtils;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+@WebServlet("/index")
+public class IndexServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //定义一个是否登录了的标记
+        boolean isLogin = false;
+        //获取session如果session不为空有一个username属性，说明用户已经登录
+        HttpSession session = req.getSession(false);
+        if(session!=null && session.getAttribute("username")!=null){
+            //进入到这里说明用户用户登录了。只需要把登录标记改为true
+            isLogin = true;
+        } else{
+            //需要token验证
+            Cookie[] cookies = req.getCookies();
+            if(cookies!=null &&  cookies.length>0){
+                String series = null;
+                String token = null;
+                for (Cookie cookie : cookies) {
+                    if ("remember".equals(cookie.getName())) {
+                        String data = cookie.getValue();
+                        series = data.split(":")[0];
+                        token = data.split(":")[1];
+                        break;
+                    }
+                }
+                if(series !=null && token !=null){
+                    //验证token的有效性，需要查询数据库的user_remember_tokens数据表
+                    String sql = "select u.username from user_remember_tokens urt join t_user u on urt.user_id=u.id where urt.token=? and urt.series=? and urt.fingerprint=? and urt.expires_at > now() and urt.revoked = '0'";
+                    try(Connection conn = DbUtils.getConnection();
+                        PreparedStatement ps = conn.prepareStatement(sql);){
+                        ps.setString(1, token);
+                        ps.setString(2, series);
+                        String ip = req.getRemoteAddr();
+                        String userAgent = req.getHeader("User-Agent");
+                        String fingerprint = DigestUtils.sha256Hex(ip+userAgent+"salt");
+                        ps.setString(3, fingerprint);
+                        try(ResultSet rs = ps.executeQuery();){
+                            if(rs.next()){
+                                //能够进入这里说明token有效
+                                HttpSession s = req.getSession();
+                                s.setAttribute("username", rs.getString("username"));
+                                isLogin = true; //说明登录成功
+                            } else {
+                                //token无效
+                                //删除客户端token，将数据库里面的revoke字段设置为1
+                                String sql1 = "update user_remember_tokens set revoked=1 where token=?";
+                                try(PreparedStatement ps1 = conn.prepareStatement(sql1);){
+                                    ps1.setString(1, token);
+                                    int count = ps1.executeUpdate();
+                                    //删除浏览器客户端的token
+                                    Cookie cookie = new Cookie("remember", "");
+                                    cookie.setMaxAge(0);
+                                    resp.addCookie(cookie);
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        }
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+            }
+        }
+        if (isLogin) {
+            //如果已经登录了，跳转到list
+            //重定向到list页面或者转发也行
+            // resp.sendRedirect(req.getContextPath() + "/list");
+            req.getRequestDispatcher("/list").forward(req, resp);
+
+        } else {
+           //如果没有，转发到/view
+            req.setAttribute("template", "index");
+            req.getRequestDispatcher("/view").forward(req, resp);
+        }
+
+    }
+}
+
+```
+
+### 重启服务器，发现可以直接进入列表页面了，因为我们的token没有过期，可以免登录
+
+![image-20261023131457357](./note22-会话管理.assets/image-20261023131457357.png)
+
+# 演练10，实现退出登录删除token功能
+
+## 1.进入LogoutServlet，修改代码如下
+
+```
+package org.kenny.dept.servlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import org.kenny.dept.util.DbUtils;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+@WebServlet("/logout")
+public class LogoutServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //logout要做什么？
+        //获取session对象并且销毁
+        HttpSession session = req.getSession(false);
+        if(session != null) {
+            session.invalidate(); //销毁session
+        }
+//        //删除cookie
+//        Cookie cookie= new Cookie("username", ""); //名称和我们当前cookie的键名称必须一致，value可以不写
+//        cookie.setMaxAge(0);
+//        resp.addCookie(cookie);
+        //删除客户端的token，也就是cookie里面的，并且在数据库中把token的revoked设置为1
+        Cookie[] cookies = req.getCookies();
+        if(cookies!=null &&  cookies.length>0){
+            String series = null;
+            String token = null;
+            for (Cookie cookie : cookies) {
+                if ("remember".equals(cookie.getName())) {
+                    String data = cookie.getValue();
+                    series = data.split(":")[0];
+                    token = data.split(":")[1];
+                    break;
+                }
+            }
+            if(series !=null && token !=null){
+                String sql1 = "update user_remember_tokens set revoked=1 where token=?";
+                try(Connection conn = DbUtils.getConnection();
+                    PreparedStatement ps1 = conn.prepareStatement(sql1);){
+                    ps1.setString(1, token);
+                    int count = ps1.executeUpdate();
+                    //删除浏览器客户端的token
+                    Cookie cookie = new Cookie("remember", "");
+                    cookie.setMaxAge(0);
+                    resp.addCookie(cookie);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+
+        //重定向到登录页面
+        resp.sendRedirect(req.getContextPath());
+    }
+}
+
+```
+
+
+
+## 2.重启服务器，此时不需要登录就会显示列表
+
+![image-20261023134217304](./note22-会话管理.assets/image-20261023134217304.png)
+
+## 3.点击退出登录，效果如下
+
+![image-20261023134304078](./note22-会话管理.assets/image-20261023134304078.png)
+
+![image-20261023134341351](./note22-会话管理.assets/image-20261023134341351.png)
+
+### 打开web调试工具，查看cookie，有token的cookie被删除，有sessionid的cookie还在，不过此时我们认为用户没有登录
+
+![image-20261023134522338](./note22-会话管理.assets/image-20261023134522338.png)
+
+
+
+### 查看数据库，发现token被撤销了，一切工作正常
+
+![image-20261023134712517](./note22-会话管理.assets/image-20261023134712517.png)
+
+## 虽然我们这里的程序完成了，但是还是有一些地方有问题
+
+### 1.没有实现series机制
+
+### 2.没有完整的用户权限系统
+
+### 3.没有实现保护敏感信息的功能
+
+### 4.没有实现对重要操作比如支付功能设置每一次都必须输入密码
+
+### 5.用户修改密码和邮箱后，需要撤销该用户的所有token
+
+### 6.限制用户的token数量
+
 
 
 
