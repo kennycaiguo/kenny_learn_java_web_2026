@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/bank/bank.iml" filepath="$PROJECT_DIR$/bank/bank.iml" />
       <module fileurl="file://$PROJECT_DIR$/java-web-idea.iml" filepath="$PROJECT_DIR$/java-web-idea.iml" />
       <module fileurl="file://$PROJECT_DIR$/tmpl-pattern/tmpl-pattern.iml" filepath="$PROJECT_DIR$/tmpl-pattern/tmpl-pattern.iml" />
       <module fileurl="file://$PROJECT_DIR$/web03/web03.iml" filepath="$PROJECT_DIR$/web03/web03.iml" />

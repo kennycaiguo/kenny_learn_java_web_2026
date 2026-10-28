@@ -93,7 +93,11 @@ com.jkweilai.dept
 
 ### 数据库表和数据的准备
 
+
+## 创建数据表
+
 ```sql
+
 drop table if exists t_act;
 
 create table t_act(
@@ -1756,3 +1760,6 @@ MVC（Model-View-Controller）是一种软件架构模式，它将应用程序�
 
 3. MVC的Model在三层架构中可能对应业务逻辑层+数据访问层
 
+   
+
+# 扩展： [什么是java的DDD项目](什么是java的DDD项目.md)
