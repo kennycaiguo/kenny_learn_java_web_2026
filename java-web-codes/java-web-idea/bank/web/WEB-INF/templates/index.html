@@ -111,22 +111,22 @@
 <div class="container">
   <h1>银行账户转账</h1>
 
-  <form id="transferForm" method="post">
+  <form id="transferForm" method="post" th:action="@{/transfer}">
     <div class="form-group">
       <label for="fromAccount">转出账户</label>
-      <input type="text" id="fromAccount" placeholder="请输入转出账户号码" required>
+      <input type="text" id="fromAccount" name="fromAccount" placeholder="请输入转出账户号码" required>
       <div class="hint">例如：6222021234567890123</div>
     </div>
 
     <div class="form-group">
       <label for="toAccount">转入账户</label>
-      <input type="text" id="toAccount" placeholder="请输入转入账户号码" required>
+      <input type="text" id="toAccount" name="toAccount"  placeholder="请输入转入账户号码" required>
       <div class="hint">例如：6228481234567890123</div>
     </div>
 
     <div class="form-group">
       <label for="amount">转账金额 (元)</label>
-      <input type="number" id="amount" min="0.01" step="0.01" placeholder="请输入转账金额" required>
+      <input type="number" id="amount" name="amount" min="0.01" step="0.01" placeholder="请输入转账金额" required>
     </div>
 
     <button id="transferBtn">确认转账</button>
